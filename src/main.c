@@ -6,6 +6,10 @@
 
 #define SCREEN_HEIGHT 800
 
+#define CANNON_POSITION 120
+
+#define thetaSpeed 200.0f
+
 typedef enum GameState {
 	GAME_STATE_TITLE,
 	GAME_STATE_MAIN_MENU
@@ -17,41 +21,36 @@ void DrawTitleScreen(void);
 bool IsTitleScreenFinished(void);
 
 // Runs the game loop and switches between game states.
-int main ()
-{
+int main (){
+
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ORB-E");
-
-	GameState gameState = GAME_STATE_TITLE;
-	ResetTitleScreen();
-	
+	SetTargetFPS(60);
 	while (!WindowShouldClose())
 	{
-		if (gameState == GAME_STATE_TITLE)
-		{
-			UpdateTitleScreen();
+    Rectangle ground = {0,SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
+	Rectangle cannonBase = {120, (SCREEN_HEIGHT*2/3) - 15, 100, 15};
+	Rectangle cannonBody = {120, (SCREEN_HEIGHT*2/3) - 50, 100, 35};
+	Vector2 cannonRotationPoint = (Vector2){ 120, (SCREEN_HEIGHT*2/3) - 25};
+    int end_projectile_game = 0;
+	float rotation = 0.0f;
+    while (!WindowShouldClose() && !end_projectile_game){
 
-			if (IsTitleScreenFinished())
-			{
-				gameState = GAME_STATE_MAIN_MENU;
-			}
-		}
+        float deltaTime = GetFrameTime();
 
-		BeginDrawing();
+		if (IsKeyDown(KEY_UP) && rotation <70) rotation += thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_DOWN) && rotation >1) rotation += thetaSpeed*deltaTime;
 
-		if (gameState == GAME_STATE_TITLE)
-		{
-			DrawTitleScreen();
-		}
-		else if (gameState == GAME_STATE_MAIN_MENU)
-		{
-			// TODO: Draw the Main Menu when that feature is implemented.
-			ClearBackground(WHITE);
-		}
-		
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawRectangleRec(ground, GRAY);
+		DrawRectangleRec(cannonBase, BROWN);
+		DrawRectanglePro(cannonBody, cannonRotationPoint, rotation, LIGHTGRAY);
 		EndDrawing();
+
 	}
+}
 
 	CloseWindow();
 	return 0;
