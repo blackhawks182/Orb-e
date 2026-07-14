@@ -118,9 +118,9 @@ endif
 GENERATED :=
 OBJECTS :=
 
-GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/Escape_water.o
 GENERATED += $(OBJDIR)/projectile.o
-OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/Escape_water.o
 OBJECTS += $(OBJDIR)/projectile.o
 
 # Rules
@@ -185,7 +185,7 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/main.o: src/main.c
+$(OBJDIR)/Escape_water.o: src/Escape_water.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/projectile.o: src/projectile.c
