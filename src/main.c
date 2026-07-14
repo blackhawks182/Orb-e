@@ -81,18 +81,65 @@ int main(void) {
 
         // Screen edge wrapping
         WrapPosition(&player.position, player.radius);
+		// Compute forward facing vector to draw the direction indicator line
+        Vector2 forward = { 
+            cosf((player.rotation - 90.0f) * DEG2RAD), 
+            sinf((player.rotation - 90.0f) * DEG2RAD) 
+        };
 
 		
+        // FIRING SHURIKENS
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            for (int i = 0; i < MAX_SHURIKENS; i++) {
+                if (!shurikens[i].active) {
+                    // Position shuriken slightly outward at the tip of the ship
+                    shurikens[i].position = (Vector2){
+                        player.position.x + shipForward.x * player.radius,
+                        player.position.y + shipForward.y * player.radius
+                    };
+                    
+                    // Match the trajectory velocity with weapon speeds
+                    shurikens[i].velocity = (Vector2){
+                        shipForward.x * SHURIKEN_SPEED,
+                        shipForward.y * SHURIKEN_SPEED
+                    };
+                    
+                    shurikens[i].lifeTime = SHURIKEN_LIFETIME;
+                    shurikens[i].rotation = 0.0f;
+                    shurikens[i].active = true;
+                    break; // Found an empty slot, stop looking!
+                }
+            }
+        }
+
+        // UPDATE PROJECTILES
+        
+        for (int i = 0; i < MAX_SHURIKENS; i++) {
+            if (shurikens[i].active) {
+                // Update translation positions
+                shurikens[i].position.x += shurikens[i].velocity.x * dt;
+                shurikens[i].position.y += shurikens[i].velocity.y * dt;
+                
+                // Spin the shuriken graphic rapidly over time (720 degrees per second)
+                shurikens[i].rotation += 720.0f * dt;
+                
+                // Allow bullets to wrap edges cleanly with 0 margin
+                WrapPosition(&shurikens[i].position, 0.0f);
+
+                // Age the shuriken and disable if lifespan runs out
+                shurikens[i].lifeTime -= dt;
+                if (shurikens[i].lifeTime <= 0) {
+                    shurikens[i].active = false;
+                }
+            }
+        }
+
 
         // RENDER
         
         BeginDrawing();
         ClearBackground(BLUE);
-// Compute forward facing vector to draw the direction indicator line
-        Vector2 forward = { 
-            cosf((player.rotation - 90.0f) * DEG2RAD), 
-            sinf((player.rotation - 90.0f) * DEG2RAD) 
-        };
 
 		// Draw Active Shurikens
         for (int i = 0; i < MAX_SHURIKENS; i++) {
