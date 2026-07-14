@@ -30,15 +30,15 @@ int main (){
     Rectangle ground = {0,SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
 	Rectangle cannonBase = {120, (SCREEN_HEIGHT*2/3) - 15, 100, 15};
 	Rectangle cannonBody = {120, (SCREEN_HEIGHT*2/3) - 50, 100, 35};
-	Vector2 cannonRotationPoint = (Vector2){ 120, (SCREEN_HEIGHT*2/3) - 25};
+	Vector2 cannonRotationPoint = (Vector2){ 0.0f, 0.0f};
     int end_projectile_game = 0;
 	float rotation = 0.0f;
 	while (!WindowShouldClose())
 	{
         float deltaTime = GetFrameTime();
 
-		if (IsKeyDown(KEY_UP) && rotation <70) rotation += thetaSpeed*deltaTime;
-		if (IsKeyDown(KEY_DOWN) && rotation >1) rotation += thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_UP) && rotation > -70) rotation -= thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_DOWN) && rotation < -1) rotation += thetaSpeed*deltaTime;
 
         BeginDrawing();
         ClearBackground(BLACK);
