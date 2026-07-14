@@ -63,6 +63,26 @@ int main(void) {
         // ---------------------------------------------------------------------
         BeginDrawing();
         ClearBackground(BLACK);
+// Compute forward facing vector to draw the direction indicator line
+        Vector2 forward = { 
+            cosf((player.rotation - 90.0f) * DEG2RAD), 
+            sinf((player.rotation - 90.0f) * DEG2RAD) 
+        };
+
+        // Draw Orb Body
+        DrawCircleV(player.position, player.radius, RAYWHITE);
+
+        // Draw Reactor Core Visual
+        DrawCircleV(player.position, player.radius * 0.35f, BLUE);
+
+        // Draw Nose Direction Pointer Line (points where you are currently traveling)
+        Vector2 noseLineEnd = {
+            player.position.x + forward.x * player.radius,
+            player.position.y + forward.y * player.radius
+        };
+        DrawLineEx(player.position, noseLineEnd, 3.0f, RED);
+
+        
 
         
         EndDrawing();
