@@ -66,12 +66,14 @@ int main(void) {
             player.rotation = (atan2f(movement.y, movement.x) * RAD2DEG) + 90.0f;
         }
 
+        // Screen edge wrapping
+        WrapPosition(&player.position, player.radius);
+
         
-        // ---------------------------------------------------------------------
         // RENDER
-        // ---------------------------------------------------------------------
+        
         BeginDrawing();
-        ClearBackground(BLACK);
+        ClearBackground(BLUE);
 // Compute forward facing vector to draw the direction indicator line
         Vector2 forward = { 
             cosf((player.rotation - 90.0f) * DEG2RAD), 
