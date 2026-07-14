@@ -124,6 +124,15 @@ OBJECTS += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/title.o
 OBJECTS += $(OBJDIR)/title.o
 
+GENERATED += $(OBJDIR)/cannon_throw.o
+OBJECTS += $(OBJDIR)/cannon_throw.o
+
+GENERATED += $(OBJDIR)/underwater_escape.o
+OBJECTS += $(OBJDIR)/underwater_escape.o
+
+GENERATED += $(OBJDIR)/collider.o
+OBJECTS += $(OBJDIR)/collider.o
+
 # Rules
 # #############################################
 
@@ -191,6 +200,18 @@ $(OBJDIR)/main.o: src/main.c
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
 $(OBJDIR)/title.o: src/title.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+
+$(OBJDIR)/cannon_throw.o: src/cannon_throw.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+
+$(OBJDIR)/underwater_escape.o: src/underwater_escape.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+
+$(OBJDIR)/collider.o: src/collider.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
