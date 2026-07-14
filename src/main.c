@@ -6,11 +6,23 @@
 #define ORB_SIZE 20.0f
 #define MOVE_SPEED 350.0f // Speed of direct movement in pixels per second
 
+#define MAX_SHURIKENS 20
+#define SHURIKEN_SPEED 700.0f
+#define SHURIKEN_LIFETIME 1.5f // Seconds before a shuriken disappears
+
 typedef struct Orb {
     Vector2 position;
     float radius;
     float rotation; // Maintained purely to point the visual indicator where you move
 } Orb;
+
+typedef struct Shuriken {
+    Vector2 position;
+    Vector2 velocity;
+    float lifeTime;
+    float rotation; // Rotation of the shuriken graphic itself
+    bool active;
+} Shuriken;
 
 // Helper to wrap positions around screen edges
 void WrapPosition(Vector2 *pos, float margin) {
@@ -32,7 +44,7 @@ int main(void) {
     player.radius = ORB_SIZE;
     player.rotation = 0.0f; // Starts facing up
 
-    
+    Shuriken shurikens[MAX_SHURIKENS] = {0};
     // 2. Main Game Loop
     while (!WindowShouldClose()) {
 		float dt = GetFrameTime();
