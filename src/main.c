@@ -60,7 +60,7 @@ int main (){
     Rectangle ground = {0,SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
 	Rectangle cannonBase = {120, (SCREEN_HEIGHT*2/3) - 15, 100, 15};
 	Rectangle cannonBody = {120, (SCREEN_HEIGHT*2/3) - 50, 100, 35};
-    Rectangle speedBar = {120, (SCREEN_HEIGHT*2/3) - 50, 100, 5};
+    Rectangle speedBar = {120, (SCREEN_HEIGHT*2/3) - 180, 100, 5};
 	Vector2 cannonRotationPoint = (Vector2){ 0.0f, 0.0f};
     int end_projectile_game = 0;
     int orbInCannon = 1;
@@ -77,11 +77,11 @@ int main (){
 		if (IsKeyDown(KEY_UP) && rotation > -70) rotation -= thetaSpeed*deltaTime;
 		if (IsKeyDown(KEY_DOWN) && rotation < -1) rotation += thetaSpeed*deltaTime;
         if (launchSpeed >= maxSpeed) barIncreasing = 0;
-        if (launchSpeed <= maxSpeed) barIncreasing = 1;
+        if (launchSpeed <= minSpeed) barIncreasing = 1;
         if (IsKeyDown(KEY_Z) && orbInCannon) 
             if (launchSpeed <= maxSpeed && barIncreasing) launchSpeed += speedSpeed*deltaTime;
-            else if (launchSpeed => minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
-
+            else if (launchSpeed >= minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
+        speedBar.width = (100*launchSpeed/maxSpeed);
         Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
         BeginDrawing();
         ClearBackground(BLACK);
