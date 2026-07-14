@@ -27,16 +27,14 @@ int main (){
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ORB-E");
 	SetTargetFPS(60);
-	while (!WindowShouldClose())
-	{
     Rectangle ground = {0,SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
 	Rectangle cannonBase = {120, (SCREEN_HEIGHT*2/3) - 15, 100, 15};
 	Rectangle cannonBody = {120, (SCREEN_HEIGHT*2/3) - 50, 100, 35};
 	Vector2 cannonRotationPoint = (Vector2){ 120, (SCREEN_HEIGHT*2/3) - 25};
     int end_projectile_game = 0;
 	float rotation = 0.0f;
-    while (!WindowShouldClose() && !end_projectile_game){
-
+	while (!WindowShouldClose())
+	{
         float deltaTime = GetFrameTime();
 
 		if (IsKeyDown(KEY_UP) && rotation <70) rotation += thetaSpeed*deltaTime;
@@ -50,7 +48,7 @@ int main (){
 		EndDrawing();
 
 	}
-}
+
 
 	CloseWindow();
 	return 0;
