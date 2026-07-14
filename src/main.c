@@ -12,6 +12,15 @@ typedef struct Orb {
     float rotation; // Maintained purely to point the visual indicator where you move
 } Orb;
 
+// Helper to wrap positions around screen edges
+void WrapPosition(Vector2 *pos, float margin) {
+    if (pos->x < -margin) pos->x = SCREEN_WIDTH + margin;
+    if (pos->x > SCREEN_WIDTH + margin) pos->x = -margin;
+    if (pos->y < -margin) pos->y = SCREEN_HEIGHT + margin;
+    if (pos->y > SCREEN_HEIGHT + margin) pos->y = -margin;
+}
+
+
 
 int main(void) {
     // 1. Initialization
