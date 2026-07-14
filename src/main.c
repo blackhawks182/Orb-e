@@ -15,10 +15,6 @@ void ResetTitleScreen(void);
 void UpdateTitleScreen(void);
 void DrawTitleScreen(void);
 bool IsTitleScreenFinished(void);
-void ResetMainMenu(void);
-void UpdateMainMenu(void);
-void DrawMainMenu(void);
-bool IsMainMenuQuitRequested(void);
 
 // Runs the game loop and switches between game states.
 int main ()
@@ -39,17 +35,6 @@ int main ()
 			if (IsTitleScreenFinished())
 			{
 				gameState = GAME_STATE_MAIN_MENU;
-				ResetMainMenu();
-			}
-		}
-		else if (gameState == GAME_STATE_MAIN_MENU)
-		{
-			UpdateMainMenu();
-
-			if (IsMainMenuQuitRequested())
-			{
-				CloseWindow();
-				break;
 			}
 		}
 
@@ -61,7 +46,8 @@ int main ()
 		}
 		else if (gameState == GAME_STATE_MAIN_MENU)
 		{
-			DrawMainMenu();
+			// TODO: Draw the Main Menu when that feature is implemented.
+			ClearBackground(WHITE);
 		}
 		
 		EndDrawing();
