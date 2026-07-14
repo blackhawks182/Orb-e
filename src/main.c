@@ -45,6 +45,7 @@ int main(void) {
     player.rotation = 0.0f; // Starts facing up
 
     Shuriken shurikens[MAX_SHURIKENS] = {0};
+
     // 2. Main Game Loop
     while (!WindowShouldClose()) {
 		float dt = GetFrameTime();
@@ -81,7 +82,8 @@ int main(void) {
         // Screen edge wrapping
         WrapPosition(&player.position, player.radius);
 
-        
+		
+
         // RENDER
         
         BeginDrawing();
@@ -91,6 +93,21 @@ int main(void) {
             cosf((player.rotation - 90.0f) * DEG2RAD), 
             sinf((player.rotation - 90.0f) * DEG2RAD) 
         };
+
+		// Draw Active Shurikens
+        for (int i = 0; i < MAX_SHURIKENS; i++) {
+            if (shurikens[i].active) {
+                float shurikenSize = 25.0f;
+
+                // Outer 4-pointed red blade structure
+                DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, RED);
+
+                // Center contrasting rings
+                DrawCircleV(shurikens[i].position, 4.0f, MAROON);
+                DrawCircleV(shurikens[i].position, 2.0f, ORANGE);
+            }
+        }
+
 
         // Draw Orb Body
         DrawCircleV(player.position, player.radius, RAYWHITE);
