@@ -84,8 +84,8 @@ int main(void) {
         DrawCircleV(player.position, player.radius, RAYWHITE);
 
         // Draw Reactor Core Visual
-        DrawCircleV(player.position, player.radius * 0.35f, BLUE);
-
+       DrawCircleV(player.position, player.radius * 0.35f, GetColor(0x9A949EFF));
+	   
         // Draw Nose Direction Pointer Line (points where you are currently traveling)
         Vector2 noseLineEnd = {
             player.position.x + forward.x * player.radius,
