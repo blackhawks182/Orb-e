@@ -95,14 +95,14 @@ int main(void) {
                 if (!shurikens[i].active) {
                     // Position shuriken slightly outward at the tip of the ship
                     shurikens[i].position = (Vector2){
-                        player.position.x + shipForward.x * player.radius,
-                        player.position.y + shipForward.y * player.radius
+                        player.position.x + forward.x * player.radius,
+                        player.position.y + forward.y * player.radius
                     };
                     
                     // Match the trajectory velocity with weapon speeds
                     shurikens[i].velocity = (Vector2){
-                        shipForward.x * SHURIKEN_SPEED,
-                        shipForward.y * SHURIKEN_SPEED
+                        forward.x * SHURIKEN_SPEED,
+                        forward.y * SHURIKEN_SPEED
                     };
                     
                     shurikens[i].lifeTime = SHURIKEN_LIFETIME;
@@ -124,8 +124,15 @@ int main(void) {
                 // Spin the shuriken graphic rapidly over time (720 degrees per second)
                 shurikens[i].rotation += 720.0f * dt;
                 
-                // Allow bullets to wrap edges cleanly with 0 margin
-                WrapPosition(&shurikens[i].position, 0.0f);
+                // Deactivate shuriken if it goes off-screen
+                float margin = 25.0f; // Matches shuriken size so it clears the screen fully before vanishing
+                if (shurikens[i].position.x < -margin || 
+                     shurikens[i].position.x > SCREEN_WIDTH + margin || 
+                     shurikens[i].position.y < -margin || 
+                     shurikens[i].position.y > SCREEN_HEIGHT + margin) 
+                     {
+                       shurikens[i].active = false;
+                     }
 
                 // Age the shuriken and disable if lifespan runs out
                 shurikens[i].lifeTime -= dt;
