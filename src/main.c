@@ -63,7 +63,7 @@ int main (){
 	Rectangle cannonBase = {120, (SCREEN_HEIGHT*2/3) - 15, 100, 15};
 	Rectangle cannonBody = {120, (SCREEN_HEIGHT*2/3) - 50, 100, 35};
     Rectangle speedBar = {120, (SCREEN_HEIGHT*2/3) - 180, 100, 5};
-	Vector2 cannonRotationPoint = (Vector2){ 0.0f, 0.0f};
+	Vector2 cannonRotationPoint = (Vector2){0.0f, 0.0f};
     int end_projectile_game = 0;
     int orbInCannon = 1;
     int orbInAir = 0;
@@ -71,6 +71,7 @@ int main (){
 	float rotation = 0.0f;
     float launchSpeed = 0.0f;
     projectileOrb Orb;
+    Orb.inAir = 0;
     Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
 	while (!WindowShouldClose())
 	{
@@ -80,17 +81,21 @@ int main (){
 		if (IsKeyDown(KEY_DOWN) && rotation < -1) rotation += thetaSpeed*deltaTime;
         if (launchSpeed >= maxSpeed) barIncreasing = 0;
         if (launchSpeed <= minSpeed) barIncreasing = 1;
-        if (IsKeyDown(KEY_Z) && orbInCannon) 
+        if (IsKeyDown(KEY_Z) && !Orb.inAir) 
             if (launchSpeed <= maxSpeed && barIncreasing) launchSpeed += speedSpeed*deltaTime;
             else if (launchSpeed >= minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
-        speedBar.width = (100*launchSpeed/maxSpeed);
-        Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
+        if (IsKeyReleased(KEY_Z) && !Orb.inAir) Orb.inAir = 1;
+        if(!Orb.inAir){
+            speedBar.width = (100*launchSpeed/maxSpeed);
+            Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
+        }
+        if(Or)
         BeginDrawing();
         ClearBackground(BLACK);
         DrawRectangleRec(ground, GRAY);
         DrawCircleV(Orb.position, projectileOrb_size, RED);
 		DrawRectangleRec(cannonBase, BROWN);
-        DrawRectangleRec(speedBar, GREEN);
+        if(!Orb.inAir)DrawRectangleRec(speedBar, GREEN);
 		DrawRectanglePro(cannonBody, cannonRotationPoint, rotation, LIGHTGRAY);
 		EndDrawing();
 
