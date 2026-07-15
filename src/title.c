@@ -10,9 +10,9 @@ static bool mainMenuStart;
 static int gameSelection;
 static bool gameSelectionBack;
 
-void StartCannonThrow(void);
-void StartUnderwaterEscape(void);
-void StartCollider(void);
+void startCannonThrow(void);
+void startUnderwaterEscape(void);
+void startCollider(void);
 
 // No custom font is used in the simple menu.
 void LoadMenuFont(void)
@@ -199,11 +199,11 @@ void UpdateGameSelection(void)
     if (IsKeyPressed(KEY_ENTER) || clicked)
     {
         if (gameSelection == 0)
-            StartCannonThrow();
+            startCannonThrow();
         else if (gameSelection == 1)
-            StartUnderwaterEscape();
+            startUnderwaterEscape();
         else
-            StartCollider();
+            startCollider();
     }
 }
 
