@@ -89,7 +89,7 @@ int main (){
             speedBar.width = (100*launchSpeed/maxSpeed);
             Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
         }
-        if(Or)
+        if(Orb.inAir){}
         BeginDrawing();
         ClearBackground(BLACK);
         DrawRectangleRec(ground, GRAY);
