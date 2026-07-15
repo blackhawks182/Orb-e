@@ -42,8 +42,8 @@ endef
 
 ifeq ($(config),debug_x64)
 TARGETDIR = bin/Debug
-TARGET = $(TARGETDIR)/orb_e.exe
-OBJDIR = obj/x64/Debug/orb_e
+TARGET = $(TARGETDIR)/GAME.exe
+OBJDIR = obj/x64/Debug/GAME
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -g -std=c++17
@@ -53,8 +53,8 @@ ALL_LDFLAGS += $(LDFLAGS) -Lbin/Debug -L/usr/lib64 -m64
 
 else ifeq ($(config),debug_x86)
 TARGETDIR = bin/Debug
-TARGET = $(TARGETDIR)/orb_e.exe
-OBJDIR = obj/x86/Debug/orb_e
+TARGET = $(TARGETDIR)/GAME.exe
+OBJDIR = obj/x86/Debug/GAME
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -g -std=c++17
@@ -64,8 +64,8 @@ ALL_LDFLAGS += $(LDFLAGS) -Lbin/Debug -L/usr/lib32 -m32
 
 else ifeq ($(config),debug_arm64)
 TARGETDIR = bin/Debug
-TARGET = $(TARGETDIR)/orb_e.exe
-OBJDIR = obj/ARM64/Debug/orb_e
+TARGET = $(TARGETDIR)/GAME.exe
+OBJDIR = obj/ARM64/Debug/GAME
 DEFINES += -DDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c17
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -g -std=c++17
@@ -75,8 +75,8 @@ ALL_LDFLAGS += $(LDFLAGS) -Lbin/Debug
 
 else ifeq ($(config),release_x64)
 TARGETDIR = bin/Release
-TARGET = $(TARGETDIR)/orb_e.exe
-OBJDIR = obj/x64/Release/orb_e
+TARGET = $(TARGETDIR)/GAME.exe
+OBJDIR = obj/x64/Release/GAME
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c17 -Wl,--subsystem,windows
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -Wshadow -O2 -std=c++17 -Wl,--subsystem,windows
@@ -86,8 +86,8 @@ ALL_LDFLAGS += $(LDFLAGS) -Lbin/Release -L/usr/lib64 -m64 -mwindows -s
 
 else ifeq ($(config),release_x86)
 TARGETDIR = bin/Release
-TARGET = $(TARGETDIR)/orb_e.exe
-OBJDIR = obj/x86/Release/orb_e
+TARGET = $(TARGETDIR)/GAME.exe
+OBJDIR = obj/x86/Release/GAME
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c17 -Wl,--subsystem,windows
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -Wshadow -O2 -std=c++17 -Wl,--subsystem,windows
@@ -97,8 +97,8 @@ ALL_LDFLAGS += $(LDFLAGS) -Lbin/Release -L/usr/lib32 -m32 -mwindows -s
 
 else ifeq ($(config),release_arm64)
 TARGETDIR = bin/Release
-TARGET = $(TARGETDIR)/orb_e.exe
-OBJDIR = obj/ARM64/Release/orb_e
+TARGET = $(TARGETDIR)/GAME.exe
+OBJDIR = obj/ARM64/Release/GAME
 DEFINES += -DNDEBUG -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -D_WIN32
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c17 -Wl,--subsystem,windows
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -Wshadow -O2 -std=c++17 -Wl,--subsystem,windows
@@ -118,20 +118,10 @@ endif
 GENERATED :=
 OBJECTS :=
 
-GENERATED += $(OBJDIR)/main.o
-OBJECTS += $(OBJDIR)/main.o
-
-GENERATED += $(OBJDIR)/title.o
-OBJECTS += $(OBJDIR)/title.o
-
-GENERATED += $(OBJDIR)/cannon_throw.o
-OBJECTS += $(OBJDIR)/cannon_throw.o
-
-GENERATED += $(OBJDIR)/underwater_escape.o
-OBJECTS += $(OBJDIR)/underwater_escape.o
-
-GENERATED += $(OBJDIR)/collider.o
-OBJECTS += $(OBJDIR)/collider.o
+GENERATED += $(OBJDIR)/Escape_water.o
+GENERATED += $(OBJDIR)/projectile.o
+OBJECTS += $(OBJDIR)/Escape_water.o
+OBJECTS += $(OBJDIR)/projectile.o
 
 # Rules
 # #############################################
@@ -141,7 +131,7 @@ all: $(TARGET)
 
 $(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
-	@echo Linking orb_e
+	@echo Linking GAME
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
 
@@ -162,7 +152,7 @@ else
 endif
 
 clean:
-	@echo Cleaning orb_e
+	@echo Cleaning GAME
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
 	$(SILENT) rm -rf $(GENERATED)
@@ -195,23 +185,10 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/main.o: src/main.c
+$(OBJDIR)/Escape_water.o: src/Escape_water.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-
-$(OBJDIR)/title.o: src/title.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-
-$(OBJDIR)/cannon_throw.o: src/cannon_throw.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-
-$(OBJDIR)/underwater_escape.o: src/underwater_escape.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-
-$(OBJDIR)/collider.o: src/collider.c
+$(OBJDIR)/projectile.o: src/projectile.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

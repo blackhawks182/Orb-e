@@ -1,66 +1,247 @@
 #include "raylib.h"
 
-#define TITLE_SCREEN_DURATION 3.0f
-#define TITLE_FLASH_DURATION 0.18f
+static float titleTimer;
+static bool titleFinished;
 
-static float titleScreenTimer = 0.0f;
-static bool titleScreenFinished = false;
+static int mainMenuSelection;
+static bool mainMenuQuit;
+static bool mainMenuStart;
 
-// Resets title screen timing before the state starts.
-void ResetTitleScreen(void)
+static int gameSelection;
+static bool gameSelectionBack;
+
+void StartCannonThrow(void);
+void StartUnderwaterEscape(void);
+void StartCollider(void);
+
+// No custom font is used in the simple menu.
+void LoadMenuFont(void)
 {
-    titleScreenTimer = 0.0f;
-    titleScreenFinished = false;
 }
 
-// Updates the title screen timer and handles transition readiness.
+// No custom font needs to be unloaded.
+void UnloadMenuFont(void)
+{
+}
+
+// Reset the title screen timer.
+void ResetTitleScreen(void)
+{
+    titleTimer = 0.0f;
+    titleFinished = false;
+}
+
+// Update the title screen time.
 void UpdateTitleScreen(void)
 {
-    titleScreenTimer += GetFrameTime();
+    titleTimer += GetFrameTime();
 
-    if (titleScreenTimer >= TITLE_SCREEN_DURATION)
+    if (titleTimer >= 2.0f)
     {
-        titleScreenTimer = TITLE_SCREEN_DURATION;
-        titleScreenFinished = true;
+        titleTimer = 2.0f;
+        titleFinished = true;
     }
 }
 
-// Returns whether the title screen has completed.
+// Check if the title screen is done.
 bool IsTitleScreenFinished(void)
 {
-    return titleScreenFinished;
+    return titleFinished;
 }
 
-// Draws centered 3D-style title text with a brief starting flash.
+// Draw a simple title screen.
 void DrawTitleScreen(void)
 {
-    const char *title = "ORB-E";
-    const int fontSize = 96;
-    const int spacing = 4;
-    Font font = GetFontDefault();
-    Vector2 textSize = MeasureTextEx(font, title, (float)fontSize, (float)spacing);
-    Vector2 position = {
-        ((float)GetScreenWidth() - textSize.x) * 0.5f,
-        ((float)GetScreenHeight() - textSize.y) * 0.5f
-    };
+    char *title = "ORB-E";
+    int fontSize = 80;
+    int textWidth = MeasureText(title, fontSize);
+    int x = (GetScreenWidth() - textWidth) / 2;
+    int y = (GetScreenHeight() - fontSize) / 2;
+
+    ClearBackground(WHITE);
+    DrawText(title, x, y, fontSize, BLACK);
+}
+
+// Reset the Main Menu.
+void ResetMainMenu(void)
+{
+    mainMenuSelection = 0;
+    mainMenuQuit = false;
+    mainMenuStart = false;
+}
+
+// Update Main Menu input.
+void UpdateMainMenu(void)
+{
+    int buttonX = (GetScreenWidth() - 420) / 2;
+    Rectangle startButton = { buttonX, 350, 420, 82 };
+    Rectangle quitButton = { buttonX, 456, 420, 82 };
+    Vector2 mouse = GetMousePosition();
+    float wheel = GetMouseWheelMove();
+    bool clicked = false;
+
+    if (IsKeyPressed(KEY_UP) || wheel > 0.0f)
+        mainMenuSelection = 1 - mainMenuSelection;
+
+    if (IsKeyPressed(KEY_DOWN) || wheel < 0.0f)
+        mainMenuSelection = 1 - mainMenuSelection;
+
+    if (CheckCollisionPointRec(mouse, startButton))
+    {
+        mainMenuSelection = 0;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            clicked = true;
+    }
+
+    if (CheckCollisionPointRec(mouse, quitButton))
+    {
+        mainMenuSelection = 1;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            clicked = true;
+    }
+
+    if (IsKeyPressed(KEY_ENTER) || clicked)
+    {
+        if (mainMenuSelection == 0)
+            mainMenuStart = true;
+        else
+            mainMenuQuit = true;
+    }
+}
+
+// Check if Quit Game was selected.
+bool IsMainMenuQuitRequested(void)
+{
+    return mainMenuQuit;
+}
+
+// Check if Start Game was selected.
+bool IsMainMenuStartGameRequested(void)
+{
+    return mainMenuStart;
+}
+
+// Draw the Main Menu.
+void DrawMainMenu(void)
+{
+    char *title = "ORB-E";
+    char *startText = "START GAME";
+    char *quitText = "QUIT GAME";
+    int buttonX = (GetScreenWidth() - 420) / 2;
+    int titleX = (GetScreenWidth() - MeasureText(title, 60)) / 2;
+    int startX = buttonX + (420 - MeasureText(startText, 30)) / 2;
+    int quitX = buttonX + (420 - MeasureText(quitText, 30)) / 2;
 
     ClearBackground(WHITE);
 
-    if (titleScreenTimer < TITLE_FLASH_DURATION)
+    DrawText(title, titleX, 110, 60, BLACK);
+
+    DrawRectangleLines(buttonX, 350, 420, 82, BLACK);
+    DrawRectangleLines(buttonX, 456, 420, 82, BLACK);
+
+    if (mainMenuSelection == 0)
+        DrawRectangleLinesEx((Rectangle){ buttonX, 350, 420, 82 }, 3.0f, BLACK);
+    else
+        DrawRectangleLinesEx((Rectangle){ buttonX, 456, 420, 82 }, 3.0f, BLACK);
+
+    DrawText(startText, startX, 376, 30, BLACK);
+    DrawText(quitText, quitX, 482, 30, BLACK);
+}
+
+// Reset the Game Selection screen.
+void ResetGameSelection(void)
+{
+    gameSelection = 0;
+    gameSelectionBack = false;
+}
+
+// Update Game Selection input.
+void UpdateGameSelection(void)
+{
+    int buttonX = (GetScreenWidth() - 460) / 2;
+    Rectangle cannonButton = { buttonX, 285, 460, 72 };
+    Rectangle underwaterButton = { buttonX, 377, 460, 72 };
+    Rectangle colliderButton = { buttonX, 469, 460, 72 };
+    Vector2 mouse = GetMousePosition();
+    float wheel = GetMouseWheelMove();
+    bool clicked = false;
+
+    if (IsKeyPressed(KEY_UP) || wheel > 0.0f)
+        gameSelection = (gameSelection + 2) % 3;
+
+    if (IsKeyPressed(KEY_DOWN) || wheel < 0.0f)
+        gameSelection = (gameSelection + 1) % 3;
+
+    if (IsKeyPressed(KEY_ESCAPE))
+        gameSelectionBack = true;
+
+    if (CheckCollisionPointRec(mouse, cannonButton))
     {
-        DrawTextEx(font, title, (Vector2){ position.x - 12.0f, position.y - 12.0f },
-                   (float)fontSize, (float)spacing, Fade(YELLOW, 0.85f));
-        DrawTextEx(font, title, (Vector2){ position.x + 12.0f, position.y + 12.0f },
-                   (float)fontSize, (float)spacing, Fade(SKYBLUE, 0.75f));
+        gameSelection = 0;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            clicked = true;
     }
 
-    for (int offset = 8; offset > 0; offset--)
+    if (CheckCollisionPointRec(mouse, underwaterButton))
     {
-        DrawTextEx(font, title, (Vector2){ position.x + (float)offset, position.y + (float)offset },
-                   (float)fontSize, (float)spacing, DARKGRAY);
+        gameSelection = 1;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            clicked = true;
     }
 
-    DrawTextEx(font, title, position, (float)fontSize, (float)spacing, BLACK);
-    DrawTextEx(font, title, (Vector2){ position.x - 3.0f, position.y - 3.0f },
-               (float)fontSize, (float)spacing, LIGHTGRAY);
+    if (CheckCollisionPointRec(mouse, colliderButton))
+    {
+        gameSelection = 2;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            clicked = true;
+    }
+
+    if (IsKeyPressed(KEY_ENTER) || clicked)
+    {
+        if (gameSelection == 0)
+            StartCannonThrow();
+        else if (gameSelection == 1)
+            StartUnderwaterEscape();
+        else
+            StartCollider();
+    }
+}
+
+// Check if Escape was pressed.
+bool IsGameSelectionReturnRequested(void)
+{
+    return gameSelectionBack;
+}
+
+// Draw the Game Selection screen.
+void DrawGameSelection(void)
+{
+    char *title = "SELECT GAME MODE";
+    char *cannonText = "Cannon Throw";
+    char *underwaterText = "Underwater Escape";
+    char *colliderText = "Collider";
+    int buttonX = (GetScreenWidth() - 460) / 2;
+    int titleX = (GetScreenWidth() - MeasureText(title, 40)) / 2;
+    int cannonX = buttonX + (460 - MeasureText(cannonText, 28)) / 2;
+    int underwaterX = buttonX + (460 - MeasureText(underwaterText, 28)) / 2;
+    int colliderX = buttonX + (460 - MeasureText(colliderText, 28)) / 2;
+
+    ClearBackground(WHITE);
+
+    DrawText(title, titleX, 115, 40, BLACK);
+
+    DrawRectangleLines(buttonX, 285, 460, 72, BLACK);
+    DrawRectangleLines(buttonX, 377, 460, 72, BLACK);
+    DrawRectangleLines(buttonX, 469, 460, 72, BLACK);
+
+    if (gameSelection == 0)
+        DrawRectangleLinesEx((Rectangle){ buttonX, 285, 460, 72 }, 3.0f, BLACK);
+    else if (gameSelection == 1)
+        DrawRectangleLinesEx((Rectangle){ buttonX, 377, 460, 72 }, 3.0f, BLACK);
+    else
+        DrawRectangleLinesEx((Rectangle){ buttonX, 469, 460, 72 }, 3.0f, BLACK);
+
+    DrawText(cannonText, cannonX, 307, 28, BLACK);
+    DrawText(underwaterText, underwaterX, 399, 28, BLACK);
+    DrawText(colliderText, colliderX, 491, 28, BLACK);
 }
