@@ -51,7 +51,7 @@ void startCannonThrow(void){
     int end_projectile_game = 0;
     int barIncreasing = 1;
 	float rotation = 0.0f;
-    float launchAngle - 0.0f;
+    float launchAngle = 0.0f;
     float launchSpeed = 0.0f;
     projectileOrb Orb;
     Orb.inAir = 0;
@@ -60,8 +60,8 @@ void startCannonThrow(void){
 	{
         float deltaTime = GetFrameTime();
 
-		if (IsKeyDown(KEY_UP) && rotation > -70 && !Orb.inAir) rotation -= thetaSpeed*deltaTime;
-		if (IsKeyDown(KEY_DOWN) && rotation < -1 && !Orb.inAir) rotation += thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_UP) && rotation > -70) rotation -= thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_DOWN) && rotation < -1) rotation += thetaSpeed*deltaTime;
         if (launchSpeed >= maxSpeed) barIncreasing = 0;
         if (launchSpeed <= minSpeed) barIncreasing = 1;
         if (IsKeyDown(KEY_Z) && !Orb.inAir) 
@@ -69,8 +69,9 @@ void startCannonThrow(void){
             else if (launchSpeed >= minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
         if (IsKeyReleased(KEY_Z) && !Orb.inAir) {
             Orb.inAir = 1;
-            Orb.velocity.x = launchSpeed*cosf(rotation*DEG2RAD);
-            Orb.velocity.y = launchSpeed*sinf(rotation*DEG2RAD) - gravity*deltaTime;
+            launchAngle = rotation;
+            Orb.velocity.x = launchSpeed*cosf(launchAngle*DEG2RAD);
+            Orb.velocity.y = launchSpeed*sinf(launchAngle*DEG2RAD) - gravity*deltaTime;
         }
         if(!Orb.inAir){
             speedBar.width = (100*launchSpeed/maxSpeed);
@@ -80,6 +81,11 @@ void startCannonThrow(void){
             Orb.velocity.y += gravity*deltaTime;
             Orb.position.x += Orb.velocity.x * deltaTime;
             Orb.position.y += Orb.velocity.y *deltaTime;
+        }
+        if (Orb.inAir && Orb.position.x > SCREEN_WIDTH + projectileOrb_size || Orb.position.y > SCREEN_HEIGHT*2/3 - projectileOrb_size){
+            Orb.inAir = 0;
+            Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
+            launchSpeed = 0;
         }
         BeginDrawing();
         ClearBackground(BLACK);
