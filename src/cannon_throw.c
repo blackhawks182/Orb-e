@@ -14,13 +14,13 @@
 
 #define projectileOrb_size 15.0f
 
-#define maxSpeed 300.0f
+#define maxSpeed 1000.0f
 
-#define speedSpeed 500.0f
+#define speedSpeed 1666.6f
 
 #define minSpeed 0.0f
 
-#define gravity 90.0f
+#define gravity 600.0f
 
 Vector2 rightEdgeMidpoint(Rectangle rect, Vector2 origin, float rotation)
 {
@@ -51,6 +51,7 @@ void startCannonThrow(void){
     int end_projectile_game = 0;
     int barIncreasing = 1;
 	float rotation = 0.0f;
+    float launchAngle - 0.0f;
     float launchSpeed = 0.0f;
     projectileOrb Orb;
     Orb.inAir = 0;
