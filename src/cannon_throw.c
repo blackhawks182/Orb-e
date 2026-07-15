@@ -73,10 +73,6 @@ void startCannonThrow(void){
             Orb.velocity.x = launchSpeed*cosf(launchAngle*DEG2RAD);
             Orb.velocity.y = launchSpeed*sinf(launchAngle*DEG2RAD) - gravity*deltaTime;
         }
-        if(!Orb.inAir){
-            speedBar.width = (100*launchSpeed/maxSpeed);
-            Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
-        }
         if (Orb.inAir){
             Orb.velocity.y += gravity*deltaTime;
             Orb.position.x += Orb.velocity.x * deltaTime;
@@ -84,8 +80,11 @@ void startCannonThrow(void){
         }
         if (Orb.inAir && Orb.position.x > SCREEN_WIDTH + projectileOrb_size || Orb.position.y > SCREEN_HEIGHT*2/3 - projectileOrb_size){
             Orb.inAir = 0;
-            Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
             launchSpeed = 0;
+        }
+        if(!Orb.inAir){
+            speedBar.width = (100*launchSpeed/maxSpeed);
+            Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
         }
         BeginDrawing();
         ClearBackground(BLACK);
