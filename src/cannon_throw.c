@@ -16,11 +16,11 @@
 
 #define maxSpeed 300.0f
 
-#define speedSpeed 200.0f
+#define speedSpeed 500.0f
 
 #define minSpeed 0.0f
 
-#define gravity 200.0f
+#define gravity 90.0f
 
 Vector2 rightEdgeMidpoint(Rectangle rect, Vector2 origin, float rotation)
 {
@@ -66,16 +66,19 @@ void startCannonThrow(void){
         if (IsKeyDown(KEY_Z) && !Orb.inAir) 
             if (launchSpeed <= maxSpeed && barIncreasing) launchSpeed += speedSpeed*deltaTime;
             else if (launchSpeed >= minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
-        if (IsKeyReleased(KEY_Z) && !Orb.inAir) Orb.inAir = 1;
+        if (IsKeyReleased(KEY_Z) && !Orb.inAir) {
+            Orb.inAir = 1;
+            Orb.velocity.x = launchSpeed*cosf(rotation*DEG2RAD);
+            Orb.velocity.y = launchSpeed*sinf(rotation*DEG2RAD) - gravity*deltaTime;
+        }
         if(!Orb.inAir){
             speedBar.width = (100*launchSpeed/maxSpeed);
             Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
         }
         if (Orb.inAir){
-            Orb.velocity.x = launchSpeed*cosf(rotation*DEG2RAD);
-            Orb.velocity.y = launchSpeed*sinf(rotation*DEG2RAD) - gravity*deltaTime;
+            Orb.velocity.y += gravity*deltaTime;
             Orb.position.x += Orb.velocity.x * deltaTime;
-            Orb.position.y += launchSpeed*sinf(rotation*DEG2RAD)*deltaTime - 0.5*gravity*deltaTime*deltaTime;
+            Orb.position.y += Orb.velocity.y *deltaTime;
         }
         BeginDrawing();
         ClearBackground(BLACK);
