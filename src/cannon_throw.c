@@ -20,6 +20,8 @@
 
 #define minSpeed 0.0f
 
+#define gravity 200.0f
+
 Vector2 rightEdgeMidpoint(Rectangle rect, Vector2 origin, float rotation)
 {
     float rotationRadians = rotation * DEG2RAD;
@@ -47,8 +49,6 @@ void startCannonThrow(void){
     Rectangle speedBar = {120, (SCREEN_HEIGHT*2/3) - 180, 100, 5};
 	Vector2 cannonRotationPoint = (Vector2){0.0f, 0.0f};
     int end_projectile_game = 0;
-    int orbInCannon = 1;
-    int orbInAir = 0;
     int barIncreasing = 1;
 	float rotation = 0.0f;
     float launchSpeed = 0.0f;
@@ -59,8 +59,8 @@ void startCannonThrow(void){
 	{
         float deltaTime = GetFrameTime();
 
-		if (IsKeyDown(KEY_UP) && rotation > -70) rotation -= thetaSpeed*deltaTime;
-		if (IsKeyDown(KEY_DOWN) && rotation < -1) rotation += thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_UP) && rotation > -70 && !Orb.inAir) rotation -= thetaSpeed*deltaTime;
+		if (IsKeyDown(KEY_DOWN) && rotation < -1 && !Orb.inAir) rotation += thetaSpeed*deltaTime;
         if (launchSpeed >= maxSpeed) barIncreasing = 0;
         if (launchSpeed <= minSpeed) barIncreasing = 1;
         if (IsKeyDown(KEY_Z) && !Orb.inAir) 
@@ -70,6 +70,12 @@ void startCannonThrow(void){
         if(!Orb.inAir){
             speedBar.width = (100*launchSpeed/maxSpeed);
             Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
+        }
+        if (Orb.inAir){
+            Orb.velocity.x = launchSpeed*cosf(rotation*DEG2RAD);
+            Orb.velocity.y = launchSpeed*sinf(rotation*DEG2RAD) - gravity*deltaTime;
+            Orb.position.x += Orb.velocity.x * deltaTime;
+            Orb.position.y += launchSpeed*sinf(rotation*DEG2RAD)*deltaTime - 0.5*gravity*deltaTime*deltaTime;
         }
         BeginDrawing();
         ClearBackground(BLACK);
