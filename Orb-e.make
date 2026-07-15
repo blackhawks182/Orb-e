@@ -118,13 +118,11 @@ endif
 GENERATED :=
 OBJECTS :=
 
-GENERATED += $(OBJDIR)/Escape_water.o
 GENERATED += $(OBJDIR)/cannon_throw.o
 GENERATED += $(OBJDIR)/collider.o
 GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/title.o
 GENERATED += $(OBJDIR)/underwater_escape.o
-OBJECTS += $(OBJDIR)/Escape_water.o
 OBJECTS += $(OBJDIR)/cannon_throw.o
 OBJECTS += $(OBJDIR)/collider.o
 OBJECTS += $(OBJDIR)/main.o
@@ -193,9 +191,6 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/Escape_water.o: src/Escape_water.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/cannon_throw.o: src/cannon_throw.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"

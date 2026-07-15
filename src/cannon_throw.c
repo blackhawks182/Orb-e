@@ -20,18 +20,6 @@
 
 #define minSpeed 0.0f
 
-typedef enum GameState {
-	GAME_STATE_TITLE,
-	GAME_STATE_MAIN_MENU
-} GameState;
-
-void ResetTitleScreen(void);
-void UpdateTitleScreen(void);
-void DrawTitleScreen(void);
-bool IsTitleScreenFinished(void);
-
-
-
 Vector2 rightEdgeMidpoint(Rectangle rect, Vector2 origin, float rotation)
 {
     float rotationRadians = rotation * DEG2RAD;
@@ -44,15 +32,9 @@ Vector2 rightEdgeMidpoint(Rectangle rect, Vector2 origin, float rotation)
 }
 
 
-
 // Runs the game loop and switches between game states.
-int main (){
 
-	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-
-	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ORB-E");
-	SetTargetFPS(60);
-
+void startCannonThrow(void){
     typedef struct projectileOrb{
         Vector2 position;
         Vector2 velocity;
@@ -73,7 +55,7 @@ int main (){
     projectileOrb Orb;
     Orb.inAir = 0;
     Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
-	while (!WindowShouldClose())
+	while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO))
 	{
         float deltaTime = GetFrameTime();
 
@@ -89,7 +71,6 @@ int main (){
             speedBar.width = (100*launchSpeed/maxSpeed);
             Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
         }
-        if(Orb.inAir){}
         BeginDrawing();
         ClearBackground(BLACK);
         DrawRectangleRec(ground, GRAY);
@@ -100,8 +81,4 @@ int main (){
 		EndDrawing();
 
 	}
-
-
-	CloseWindow();
-	return 0;
 }

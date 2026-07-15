@@ -1,5 +1,10 @@
-// Placeholder for the Collider game.
-void StartCollider(void)
+#include "raylib.h"
+
+#define SCREEN_WIDTH 1200
+
+#define SCREEN_HEIGHT 800
+
+void startCollider(void)
 {
-    // TODO: Add Collider gameplay here.
+    BeginDrawing();
 }

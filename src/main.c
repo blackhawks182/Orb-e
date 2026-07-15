@@ -26,6 +26,7 @@ void UnloadMenuFont(void);
 int main ()
 {
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
+	SetTargetFPS(60);
 
 	InitWindow(1200, 800, "ORB-E");
 	LoadMenuFont();
