@@ -54,55 +54,209 @@ void startCannonThrow(void){
 
     obstacle obstacles[10];
 
-    int obstacleSet = GetRandomValue(0, 2);
+    int obstacleSet = GetRandomValue(0, 4);
     int obstacleCount = 0;
 
     if (obstacleSet == 0){
-        obstacleCount = 2;
-        obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
+        obstacleCount = 5;
+
+        obstacles[0].rectangle = (Rectangle){450, 200, 80, 80};
         obstacles[0].velocity = (Vector2){0, 0};
         obstacles[0].type = 0;
         obstacles[0].active = 1;
+        obstacles[0].leftbound = 450;
+        obstacles[0].rightbound = 530;
 
-        obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
-        obstacles[1].velocity = (Vector2){0, 0};
-        obstacles[1].type = 0;
+        obstacles[1].rectangle = (Rectangle){650, 150, 120, 40};
+        obstacles[1].velocity = (Vector2){80, 0};
+        obstacles[1].type = 1;
         obstacles[1].active = 1;
+        obstacles[1].leftbound = 550;
+        obstacles[1].rightbound = 900;
+
+        obstacles[2].rectangle = (Rectangle){850, 300, 50, 120};
+        obstacles[2].velocity = (Vector2){0, -120};
+        obstacles[2].type = 1;
+        obstacles[2].active = 1;
+        obstacles[2].leftbound = 850;
+        obstacles[2].rightbound = 900;
+
+        obstacles[3].rectangle = (Rectangle){550, 450, 150, 50};
+        obstacles[3].velocity = (Vector2){0, 0};
+        obstacles[3].type = 0;
+        obstacles[3].active = 1;
+        obstacles[3].leftbound = 550;
+        obstacles[3].rightbound = 700;
+
+        obstacles[4].rectangle = (Rectangle){950, 180, 100, 60};
+        obstacles[4].velocity = (Vector2){-140, 0};
+        obstacles[4].type = 1;
+        obstacles[4].active = 1;
+        obstacles[4].leftbound = 800;
+        obstacles[4].rightbound = 1100;
     }
 
     if (obstacleSet == 1){
-        obstacleCount = 2;
-        obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
+        obstacleCount = 5;
+
+        obstacles[0].rectangle = (Rectangle){450, 200, 50, 50};
         obstacles[0].velocity = (Vector2){100, 0};
         obstacles[0].type = 1;
         obstacles[0].active = 1;
-        obstacles[0].leftbound = 500;
-        obstacles[0].rightbound = 800;
+        obstacles[0].leftbound = 400;
+        obstacles[0].rightbound = 700;
 
-        obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
-        obstacles[1].velocity = (Vector2){0, -100};
+        obstacles[1].rectangle = (Rectangle){700, 200, 50, 120};
+        obstacles[1].velocity = (Vector2){0, 80};
         obstacles[1].type = 1;
         obstacles[1].active = 1;
-    }
+        obstacles[1].leftbound = 700;
+        obstacles[1].rightbound = 750;
 
-    if (obstacleSet == 2){
-        obstacleCount = 3;
-        obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
-        obstacles[0].velocity = (Vector2){0, 0};
-        obstacles[0].type = 0;
-        obstacles[0].active = 1;
-
-        obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
-        obstacles[1].velocity = (Vector2){0, 100};
-        obstacles[1].type = 1;
-        obstacles[1].active = 1;
-
-        obstacles[2].rectangle = (Rectangle){950, 250, 50, 50};
-        obstacles[2].velocity = (Vector2){100, 0};
+        obstacles[2].rectangle = (Rectangle){950, 300, 100, 50};
+        obstacles[2].velocity = (Vector2){-180, 0};
         obstacles[2].type = 1;
         obstacles[2].active = 1;
         obstacles[2].leftbound = 800;
         obstacles[2].rightbound = 1100;
+
+        obstacles[3].rectangle = (Rectangle){550, 450, 140, 50};
+        obstacles[3].velocity = (Vector2){0, 0};
+        obstacles[3].type = 0;
+        obstacles[3].active = 1;
+        obstacles[3].leftbound = 550;
+        obstacles[3].rightbound = 690;
+
+        obstacles[4].rectangle = (Rectangle){900, 400, 60, 60};
+        obstacles[4].velocity = (Vector2){0, 150};
+        obstacles[4].type = 1;
+        obstacles[4].active = 1;
+        obstacles[4].leftbound = 900;
+        obstacles[4].rightbound = 960;
+    }
+
+    if (obstacleSet == 2){
+        obstacleCount = 6;
+
+        obstacles[0].rectangle = (Rectangle){450, 180, 70, 70};
+        obstacles[0].velocity = (Vector2){100, 0};
+        obstacles[0].type = 1;
+        obstacles[0].active = 1;
+        obstacles[0].leftbound = 400;
+        obstacles[0].rightbound = 650;
+
+        obstacles[1].rectangle = (Rectangle){700, 180, 80, 80};
+        obstacles[1].velocity = (Vector2){0, 120};
+        obstacles[1].type = 1;
+        obstacles[1].active = 1;
+        obstacles[1].leftbound = 700;
+        obstacles[1].rightbound = 780;
+
+        obstacles[2].rectangle = (Rectangle){900, 180, 60, 60};
+        obstacles[2].velocity = (Vector2){-140, 0};
+        obstacles[2].type = 1;
+        obstacles[2].active = 1;
+        obstacles[2].leftbound = 750;
+        obstacles[2].rightbound = 1050;
+
+        obstacles[3].rectangle = (Rectangle){500, 400, 120, 50};
+        obstacles[3].velocity = (Vector2){0, 0};
+        obstacles[3].type = 0;
+        obstacles[3].active = 1;
+        obstacles[3].leftbound = 500;
+        obstacles[3].rightbound = 620;
+
+        obstacles[4].rectangle = (Rectangle){800, 350, 50, 100};
+        obstacles[4].velocity = (Vector2){0, -100};
+        obstacles[4].type = 1;
+        obstacles[4].active = 1;
+        obstacles[4].leftbound = 800;
+        obstacles[4].rightbound = 850;
+
+        obstacles[5].rectangle = (Rectangle){1000, 400, 100, 40};
+        obstacles[5].velocity = (Vector2){-100, 0};
+        obstacles[5].type = 1;
+        obstacles[5].active = 1;
+        obstacles[5].leftbound = 900;
+        obstacles[5].rightbound = 1150;
+    }
+
+    if (obstacleSet == 3){
+        obstacleCount = 4;
+
+        obstacles[0].rectangle = (Rectangle){500, 180, 50, 100};
+        obstacles[0].velocity = (Vector2){120, 0};
+        obstacles[0].type = 1;
+        obstacles[0].active = 1;
+        obstacles[0].leftbound = 450;
+        obstacles[0].rightbound = 750;
+
+        obstacles[1].rectangle = (Rectangle){800, 180, 100, 50};
+        obstacles[1].velocity = (Vector2){0, 100};
+        obstacles[1].type = 1;
+        obstacles[1].active = 1;
+        obstacles[1].leftbound = 800;
+        obstacles[1].rightbound = 900;
+
+        obstacles[2].rectangle = (Rectangle){550, 400, 80, 80};
+        obstacles[2].velocity = (Vector2){150, 0};
+        obstacles[2].type = 1;
+        obstacles[2].active = 1;
+        obstacles[2].leftbound = 500;
+        obstacles[2].rightbound = 850;
+
+        obstacles[3].rectangle = (Rectangle){950, 400, 120, 60};
+        obstacles[3].velocity = (Vector2){0, 0};
+        obstacles[3].type = 0;
+        obstacles[3].active = 1;
+        obstacles[3].leftbound = 950;
+        obstacles[3].rightbound = 1070;
+    }
+
+    if (obstacleSet == 4){
+        obstacleCount = 6;
+
+        obstacles[0].rectangle = (Rectangle){450, 150, 60, 60};
+        obstacles[0].velocity = (Vector2){80, 0};
+        obstacles[0].type = 1;
+        obstacles[0].active = 1;
+        obstacles[0].leftbound = 400;
+        obstacles[0].rightbound = 650;
+
+        obstacles[1].rectangle = (Rectangle){700, 150, 50, 100};
+        obstacles[1].velocity = (Vector2){0, 70};
+        obstacles[1].type = 1;
+        obstacles[1].active = 1;
+        obstacles[1].leftbound = 700;
+        obstacles[1].rightbound = 750;
+
+        obstacles[2].rectangle = (Rectangle){900, 150, 120, 50};
+        obstacles[2].velocity = (Vector2){-160, 0};
+        obstacles[2].type = 1;
+        obstacles[2].active = 1;
+        obstacles[2].leftbound = 750;
+        obstacles[2].rightbound = 1100;
+
+        obstacles[3].rectangle = (Rectangle){500, 350, 100, 100};
+        obstacles[3].velocity = (Vector2){0, 0};
+        obstacles[3].type = 0;
+        obstacles[3].active = 1;
+        obstacles[3].leftbound = 500;
+        obstacles[3].rightbound = 600;
+
+        obstacles[4].rectangle = (Rectangle){750, 400, 150, 40};
+        obstacles[4].velocity = (Vector2){-100, 0};
+        obstacles[4].type = 1;
+        obstacles[4].active = 1;
+        obstacles[4].leftbound = 650;
+        obstacles[4].rightbound = 1000;
+
+        obstacles[5].rectangle = (Rectangle){1000, 400, 60, 60};
+        obstacles[5].velocity = (Vector2){0, -130};
+        obstacles[5].type = 1;
+        obstacles[5].active = 1;
+        obstacles[5].leftbound = 1000;
+        obstacles[5].rightbound = 1060;
     }
 
     
@@ -162,10 +316,24 @@ void startCannonThrow(void){
             if (obstacles[i].active && obstacles[i].type == 1){
                 obstacles[i].rectangle.y += obstacles[i].velocity.y * deltaTime;
                 obstacles[i].rectangle.x += obstacles[i].velocity.x * deltaTime;
-                if (obstacles[i].rectangle.y < 100 || obstacles[i].rectangle.y + obstacles[i].rectangle.height > SCREEN_HEIGHT*2/3){
+
+                if (obstacles[i].rectangle.y < 100){
+                    obstacles[i].rectangle.y = 100;
                     obstacles[i].velocity.y *= -1;
                 }
-                if (obstacles[i].rectangle.x < obstacles[i].leftbound || obstacles[i].rectangle.x + obstacles[i].rectangle.width > obstacles[i].rightbound){
+
+                if (obstacles[i].rectangle.y + obstacles[i].rectangle.height > SCREEN_HEIGHT*2/3){
+                    obstacles[i].rectangle.y = SCREEN_HEIGHT*2/3 - obstacles[i].rectangle.height;
+                    obstacles[i].velocity.y *= -1;
+                }
+
+                if (obstacles[i].rectangle.x < obstacles[i].leftbound){
+                    obstacles[i].rectangle.x = obstacles[i].leftbound;
+                    obstacles[i].velocity.x *= -1;
+                }
+
+                if (obstacles[i].rectangle.x + obstacles[i].rectangle.width > obstacles[i].rightbound){
+                    obstacles[i].rectangle.x = obstacles[i].rightbound - obstacles[i].rectangle.width;
                     obstacles[i].velocity.x *= -1;
                 }
             }
@@ -173,6 +341,7 @@ void startCannonThrow(void){
 
         BeginDrawing();
         ClearBackground(BLACK);
+        DrawText(TextFormat("Obstacle Set: %d", obstacleSet), SCREEN_WIDTH - 180, 20, 20, WHITE);        
         DrawRectangleRec(ground, GRAY);
         DrawCircleV(Orb.position, projectileOrb_size, RED);
 		DrawRectangleRec(cannonBase, BROWN);
