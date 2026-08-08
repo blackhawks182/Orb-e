@@ -42,6 +42,19 @@ void startCannonThrow(void){
         Vector2 velocity;
         int inAir;
     } projectileOrb;
+
+    typedef struct obstacle{
+    Rectangle rectangle;
+    Vector2 velocity;
+    int type;
+    int active;
+    } obstacle;
+
+    obstacle obstacles[10];
+
+    int obstacleSet = GetRandomValue(0, 2);
+
+
     
     Rectangle ground = {0,SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
 	Rectangle cannonBase = {120, (SCREEN_HEIGHT*2/3) - 15, 100, 15};
