@@ -53,7 +53,51 @@ void startCannonThrow(void){
     obstacle obstacles[10];
 
     int obstacleSet = GetRandomValue(0, 2);
+    int obstacleCount = 0;
 
+    if (obstacleSet == 0){
+        obstacleCount = 2;
+        obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
+        obstacles[0].velocity = (Vector2){0, 0};
+        obstacles[0].type = 0;
+        obstacles[0].active = 1;
+
+        obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
+        obstacles[1].velocity = (Vector2){0, 0};
+        obstacles[1].type = 0;
+        obstacles[1].active = 1;
+    }
+
+    if (obstacleSet == 1){
+        obstacleCount = 2;
+        obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
+        obstacles[0].velocity = (Vector2){0, 100};
+        obstacles[0].type = 1;
+        obstacles[0].active = 1;
+
+        obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
+        obstacles[1].velocity = (Vector2){0, -100};
+        obstacles[1].type = 1;
+        obstacles[1].active = 1;
+    }
+
+    if (obstacleSet == 2){
+        obstacleCount = 3;
+        obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
+        obstacles[0].velocity = (Vector2){0, 0};
+        obstacles[0].type = 0;
+        obstacles[0].active = 1;
+
+        obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
+        obstacles[1].velocity = (Vector2){0, 100};
+        obstacles[1].type = 1;
+        obstacles[1].active = 1;
+
+        obstacles[2].rectangle = (Rectangle){950, 250, 50, 50};
+        obstacles[2].velocity = (Vector2){0, -100};
+        obstacles[2].type = 1;
+        obstacles[2].active = 1;
+    }
 
     
     Rectangle ground = {0,SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
@@ -90,6 +134,14 @@ void startCannonThrow(void){
             Orb.velocity.y += gravity*deltaTime;
             Orb.position.x += Orb.velocity.x * deltaTime;
             Orb.position.y += Orb.velocity.y *deltaTime;
+            for (int i = 0; i <= obstacleCount-1; i++){
+                if (obstacles[i].active && CheckCollisionCircleRec(Orb.position, projectileOrb_size, obstacles[i].rectangle)){
+                    obstacles[i].active = 0;
+                    Orb.inAir = 0;
+                    launchSpeed = 0;
+                }
+            }
+
         }
         if (Orb.inAir && Orb.position.x > SCREEN_WIDTH + projectileOrb_size || Orb.position.y > SCREEN_HEIGHT*2/3 - projectileOrb_size){
             Orb.inAir = 0;
@@ -99,11 +151,27 @@ void startCannonThrow(void){
             speedBar.width = (100*launchSpeed/maxSpeed);
             Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
         }
+
+        for (int i = 0; i <= obstacleCount-1; i++){
+            if (obstacles[i].active && obstacles[i].type == 1){
+                obstacles[i].rectangle.y += obstacles[i].velocity.y * deltaTime;
+
+                if (obstacles[i].rectangle.y < 100 || obstacles[i].rectangle.y + obstacles[i].rectangle.height > SCREEN_HEIGHT*2/3){
+                    obstacles[i].velocity.y *= -1;
+                }
+            }
+        }
+
         BeginDrawing();
         ClearBackground(BLACK);
         DrawRectangleRec(ground, GRAY);
         DrawCircleV(Orb.position, projectileOrb_size, RED);
 		DrawRectangleRec(cannonBase, BROWN);
+        for (int i = 0; i <= obstacleCount-1; i++){
+            if (obstacles[i].active){
+                DrawRectangleRec(obstacles[i].rectangle, BLUE);
+            }
+        }
         if(!Orb.inAir)DrawRectangleRec(speedBar, GREEN);
 		DrawRectanglePro(cannonBody, cannonRotationPoint, rotation, LIGHTGRAY);
 		EndDrawing();
