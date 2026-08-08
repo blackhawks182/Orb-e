@@ -48,6 +48,8 @@ void startCannonThrow(void){
     Vector2 velocity;
     int type;
     int active;
+    float leftbound;
+    float rightbound;
     } obstacle;
 
     obstacle obstacles[10];
@@ -71,9 +73,11 @@ void startCannonThrow(void){
     if (obstacleSet == 1){
         obstacleCount = 2;
         obstacles[0].rectangle = (Rectangle){600, 300, 50, 50};
-        obstacles[0].velocity = (Vector2){0, 100};
+        obstacles[0].velocity = (Vector2){100, 0};
         obstacles[0].type = 1;
         obstacles[0].active = 1;
+        obstacles[0].leftbound = 500;
+        obstacles[0].rightbound = 800;
 
         obstacles[1].rectangle = (Rectangle){800, 450, 50, 50};
         obstacles[1].velocity = (Vector2){0, -100};
@@ -94,9 +98,11 @@ void startCannonThrow(void){
         obstacles[1].active = 1;
 
         obstacles[2].rectangle = (Rectangle){950, 250, 50, 50};
-        obstacles[2].velocity = (Vector2){0, -100};
+        obstacles[2].velocity = (Vector2){100, 0};
         obstacles[2].type = 1;
         obstacles[2].active = 1;
+        obstacles[2].leftbound = 800;
+        obstacles[2].rightbound = 1100;
     }
 
     
@@ -155,9 +161,12 @@ void startCannonThrow(void){
         for (int i = 0; i <= obstacleCount-1; i++){
             if (obstacles[i].active && obstacles[i].type == 1){
                 obstacles[i].rectangle.y += obstacles[i].velocity.y * deltaTime;
-
+                obstacles[i].rectangle.x += obstacles[i].velocity.x * deltaTime;
                 if (obstacles[i].rectangle.y < 100 || obstacles[i].rectangle.y + obstacles[i].rectangle.height > SCREEN_HEIGHT*2/3){
                     obstacles[i].velocity.y *= -1;
+                }
+                if (obstacles[i].rectangle.x < obstacles[i].leftbound || obstacles[i].rectangle.x + obstacles[i].rectangle.width > obstacles[i].rightbound){
+                    obstacles[i].velocity.x *= -1;
                 }
             }
         }
