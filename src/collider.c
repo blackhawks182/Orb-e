@@ -41,4 +41,17 @@ void startCollider(void)
     Orb.velocity = (Vector2){startSpeed, 0};
     Orb.mass = startMass;
     Orb.inAir = 0;
+    while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO))
+    {
+        float deltaTime = GetFrameTime();
+
+        if (IsKeyDown(KEY_D) && Orb.velocity.x < maxSpeed) Orb.velocity.x += speedSpeed * deltaTime;
+        if (IsKeyDown(KEY_A) && Orb.velocity.x > minSpeed) Orb.velocity.x -= speedSpeed * deltaTime;
+        if (IsKeyPressed(KEY_SPACE) && !Orb.inAir) Orb.inAir = 1;
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawRectangleRec(ground, GRAY);
+        DrawCircleV(Orb.position, colliderOrb_size, RED);
+        EndDrawing();
+    }    
 }
