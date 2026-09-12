@@ -151,7 +151,7 @@ void startUnderwaterEscape(void) {
                 float shurikenSize = 25.0f;
 
                 // Outer 4-pointed red blade structure
-                DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, RED);
+                DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, BLACK);
 
                 // Center contrasting rings
                 DrawCircleV(shurikens[i].position, 4.0f, MAROON);
