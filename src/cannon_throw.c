@@ -487,9 +487,18 @@ void startCannonThrow(void){
     projectileOrb Orb;
     Orb.inAir = 0;
     Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
+    int score = 0;
+    float timer = 0.0f;
+    int points = 0;
+    int gameFinished = 0;
+    int remainingObstacles = obstacleCount;
+
 	while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO))
 	{
         float deltaTime = GetFrameTime();
+        if (!gameFinished)
+            timer += deltaTime;
+
 
 		if (IsKeyDown(KEY_UP) && rotation > -70) rotation -= thetaSpeed*deltaTime;
 		if (IsKeyDown(KEY_DOWN) && rotation < -1) rotation += thetaSpeed*deltaTime;
@@ -513,6 +522,14 @@ void startCannonThrow(void){
                     obstacles[i].active = 0;
                     Orb.inAir = 0;
                     launchSpeed = 0;
+                    remainingObstacles--;
+                    if (obstacles[i].velocity.x != 0 && obstacles[i].velocity.y != 0)
+                        points = 300;
+                    else if (obstacles[i].velocity.x != 0 || obstacles[i].velocity.y != 0)
+                        points = 200;
+                    else points = 100;
+                    int timeBonus = 500 - (int)timer * 10;
+                    score += points + timeBonus;
                 }
             }
 
@@ -552,21 +569,34 @@ void startCannonThrow(void){
                 }
             }
         }
-
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawText(TextFormat("Obstacle Set: %d", obstacleSet), SCREEN_WIDTH - 180, 20, 20, WHITE);        
-        DrawRectangleRec(ground, GRAY);
-        DrawCircleV(Orb.position, projectileOrb_size, RED);
-		DrawRectangleRec(cannonBase, BROWN);
-        for (int i = 0; i <= obstacleCount-1; i++){
-            if (obstacles[i].active){
-                DrawRectangleRec(obstacles[i].rectangle, BLUE);
+        if (remainingObstacles == 0)
+            gameFinished = 1;
+        if (!gameFinished){
+            BeginDrawing();
+            ClearBackground(BLACK);
+            DrawText(TextFormat("Obstacle Set: %d", obstacleSet), SCREEN_WIDTH - 180, 20, 20, WHITE);     
+            DrawText(TextFormat("Score: %d", score), 20, 20, 20, WHITE);
+            DrawText(TextFormat("Time: %d", (int)timer), 20, 45, 20, WHITE);   
+            DrawRectangleRec(ground, GRAY);
+            DrawCircleV(Orb.position, projectileOrb_size, RED);
+            DrawRectangleRec(cannonBase, BROWN);
+            for (int i = 0; i <= obstacleCount-1; i++){
+                if (obstacles[i].active){
+                    DrawRectangleRec(obstacles[i].rectangle, BLUE);
+                }
             }
+            if(!Orb.inAir)DrawRectangleRec(speedBar, GREEN);
+            DrawRectanglePro(cannonBody, cannonRotationPoint, rotation, LIGHTGRAY);
+            EndDrawing();
         }
-        if(!Orb.inAir)DrawRectangleRec(speedBar, GREEN);
-		DrawRectanglePro(cannonBody, cannonRotationPoint, rotation, LIGHTGRAY);
-		EndDrawing();
+        else{
+            BeginDrawing();
+            ClearBackground(BLACK);
+            DrawText("GAME COMPLETE!", 300, 300, 70, WHITE);
+            DrawText(TextFormat("Final Score: %d", score), 475, 390, 30, WHITE);
+            DrawText(TextFormat("Final Time: %d seconds", (int)timer), 430, 430, 30, WHITE);
+            EndDrawing();
+        }
 
 	}
 }
