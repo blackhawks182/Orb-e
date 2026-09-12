@@ -45,6 +45,10 @@ void startCollider(void)
     Orb.velocity = (Vector2){startSpeed, 0};
     Orb.mass = startMass;
     Orb.inAir = 0;
+    float groundPosition = 0.0f;
+    Color rec1 = GRAY;
+    Color rec2 = GREEN;
+    Color tempColor;
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO))
     {
         float deltaTime = GetFrameTime();
@@ -55,7 +59,14 @@ void startCollider(void)
             Orb.inAir = 1;
             Orb.velocity.y = -jumpSpeed;
         }
-        Orb.position.x += Orb.velocity.x * deltaTime;
+        groundPosition -= Orb.velocity.x * deltaTime;
+        if (groundPosition <= -SCREEN_WIDTH) {
+            groundPosition = 0;
+            tempColor = rec1;
+            rec1 = rec2;
+            rec2 = tempColor;
+        }
+
 
         if (Orb.inAir){
             Orb.velocity.y += gravity * deltaTime;
@@ -70,7 +81,8 @@ void startCollider(void)
 
         BeginDrawing();
         ClearBackground(BLACK);
-        DrawRectangleRec(ground, GRAY);
+        DrawRectangle(groundPosition, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3, rec1);
+        DrawRectangle(groundPosition + SCREEN_WIDTH, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3, rec2);
         DrawCircleV(Orb.position, colliderOrb_size, RED);
         DrawText(TextFormat("Speed: %.0f", Orb.velocity.x), Orb.position.x - 50, Orb.position.y - 50, 20, WHITE);
         EndDrawing();
