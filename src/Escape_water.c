@@ -1,5 +1,7 @@
 #include "raylib.h"
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 800
@@ -9,6 +11,8 @@
 #define MAX_SHURIKENS 20
 #define SHURIKEN_SPEED 700.0f
 #define SHURIKEN_LIFETIME 1.5f // Seconds before a shuriken disappears
+
+#define MAX_HAZARDS 100
 
 typedef struct Orb {
     Vector2 position;
@@ -24,6 +28,14 @@ typedef struct Shuriken {
     bool active;
 } Shuriken;
 
+typedef struct Hazard {
+    Vector2 position;
+    Vector2 velocity;
+    float radius;
+    int sizeClass; // 3 = Large, 2 = Medium, 1 = Small
+    bool active;
+} Hazard;
+
 // Helper to wrap positions around screen edges
 void WrapPosition(Vector2 *pos, float margin) {
     if (pos->x < -margin) pos->x = SCREEN_WIDTH + margin;
@@ -32,10 +44,30 @@ void WrapPosition(Vector2 *pos, float margin) {
     if (pos->y > SCREEN_HEIGHT + margin) pos->y = -margin;
 }
 
+// Helper to spawn a single sphere hazard
+void SpawnHazard(Hazard *hazards, Vector2 pos, int sizeClass) {
+    for (int i = 0; i < MAX_HAZARDS; i++) {
+        if (!hazards[i].active) {
+            hazards[i].position = pos;
+            
+            // Random angle and size-based speed (smaller spheres move faster)
+            float angle = GetRandomValue(0, 360) * DEG2RAD;
+            float speed = GetRandomValue(80, 150) / (float)sizeClass; 
+            hazards[i].velocity = (Vector2){ cosf(angle) * speed, sinf(angle) * speed };
+            
+            hazards[i].sizeClass = sizeClass;
+            hazards[i].radius = sizeClass * 15.0f;
+            hazards[i].active = true;
+            break;
+        }
+    }
+}
+
 
 
 int main(void) {
     // 1. Initialization
+    srand(time(NULL)); // Seed the random number generator
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Orb-e");
     SetTargetFPS(60);
 
@@ -45,7 +77,16 @@ int main(void) {
     player.rotation = 0.0f; // Starts facing up
 
     Shuriken shurikens[MAX_SHURIKENS] = {0};
-
+    Hazard hazards[MAX_HAZARDS] = {0};
+    // Spawn 6 initial large hazards at a safe distance from player center (150px buffer)
+    for (int i = 0; i < 6; i++) {
+        Vector2 spawnPos;
+        do {
+            spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+        } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius));
+        
+        SpawnHazard(hazards, spawnPos, 3);
+    }
     // 2. Main Game Loop
     while (!WindowShouldClose()) {
 		float dt = GetFrameTime();
@@ -141,7 +182,14 @@ int main(void) {
                 }
             }
         }
-
+        // Update Hazards movement
+        for (int i = 0; i < MAX_HAZARDS; i++) {
+            if (hazards[i].active) {
+                hazards[i].position.x += hazards[i].velocity.x * dt;
+                hazards[i].position.y += hazards[i].velocity.y * dt;
+                WrapPosition(&hazards[i].position, hazards[i].radius);
+            }
+        }
 
         // RENDER
         
@@ -154,7 +202,7 @@ int main(void) {
                 float shurikenSize = 25.0f;
 
                 // Outer 4-pointed red blade structure
-                DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, RED);
+                DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, BLACK);
 
                 // Center contrasting rings
                 DrawCircleV(shurikens[i].position, 4.0f, MAROON);
@@ -176,7 +224,16 @@ int main(void) {
         };
         DrawLineEx(player.position, noseLineEnd, 3.0f, RED);
 
-        
+        // Draw Active Hazards (Spheres)
+        for (int i = 0; i < MAX_HAZARDS; i++) {
+            if (hazards[i].active) {
+                // Outer main circle
+                DrawCircleV(hazards[i].position, hazards[i].radius, GRAY);
+                
+                // Outer ring outline for visual clarity
+                DrawCircleLines((int)hazards[i].position.x, (int)hazards[i].position.y, hazards[i].radius, LIGHTGRAY);
+            }
+        }
 
         
         EndDrawing();

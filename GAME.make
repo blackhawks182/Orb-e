@@ -119,9 +119,11 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/Escape_water.o
+GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/projectile.o
 GENERATED += $(OBJDIR)/title.o
 OBJECTS += $(OBJDIR)/Escape_water.o
+OBJECTS += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/projectile.o
 OBJECTS += $(OBJDIR)/title.o
 
@@ -188,6 +190,9 @@ endif
 # #############################################
 
 $(OBJDIR)/Escape_water.o: src/Escape_water.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/main.o: src/main.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/projectile.o: src/projectile.c
