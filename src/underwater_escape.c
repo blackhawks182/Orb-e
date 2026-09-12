@@ -73,6 +73,9 @@ void startUnderwaterEscape(void) {
 
     Shuriken shurikens[MAX_SHURIKENS] = {0};
     Hazard hazards[MAX_HAZARDS] = {0};
+
+    int score = 0;
+    bool gameOver = false;
      // Spawn 6 initial large hazards at a safe distance from player center (150px buffer)
     for (int i = 0; i < 6; i++) {
         Vector2 spawnPos;
@@ -189,7 +192,85 @@ void startUnderwaterEscape(void) {
             }
         }
 
+        if (!gameOver) {
+          // CHECK COLLISIONS: SHURIKEN vs HAZARD
+    
+    for (int i = 0; i < MAX_SHURIKENS; i++) {
+        if (!shurikens[i].active) continue;
 
+        for (int j = 0; j < MAX_HAZARDS; j++) {
+            if (!hazards[j].active) continue;
+
+            // Simple circle collision check
+            if (CheckCollisionCircles(shurikens[i].position, 12.5f, hazards[j].position, hazards[j].radius)) {
+                
+                // Destroy shuriken
+                shurikens[i].active = false;
+
+                // Award points
+                score += 100;
+
+                // Instant Disintegration: Deactivate hazard immediately with no fading
+                hazards[j].active = false;
+
+                break; // Stop checking this shuriken against other hazards
+            }
+        }
+    }
+
+    
+    // CHECK COLLISIONS: PLAYER vs HAZARD
+    
+    for (int i = 0; i < MAX_HAZARDS; i++) {
+        if (hazards[i].active) {
+            if (CheckCollisionCircles(player.position, player.radius, hazards[i].position, hazards[i].radius)) {
+                gameOver = true;
+                break;
+            }
+        }
+    }
+}
+
+// AUTO-RESPAWN: Check if active hazards dropped to 3 or fewer
+        int activeHazardCount = 0;
+        for (int i = 0; i < MAX_HAZARDS; i++) {
+            if (hazards[i].active) {
+                activeHazardCount++;
+            }
+        }
+
+        // If active hazards <= 3, spawn 3 new large hazards safely away from player
+        if (activeHazardCount <= 3) {
+            for (int i = 0; i < 3; i++) {
+                Vector2 spawnPos;
+                do {
+                    spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+                } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius));
+                
+                SpawnHazard(hazards, spawnPos, 3);
+            }
+        }
+
+if (gameOver && IsKeyPressed(KEY_R)) {
+    // Reset player position
+    player.position = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+    score = 0;
+    gameOver = false;
+
+    // Clear all existing shurikens and hazards
+    for (int i = 0; i < MAX_SHURIKENS; i++) shurikens[i].active = false;
+    for (int i = 0; i < MAX_HAZARDS; i++) hazards[i].active = false;
+
+    // Respawn 5 initial safe hazards
+    for (int i = 0; i < 5; i++) {
+        Vector2 spawnPos;
+        do {
+            spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+        } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius));
+        
+        SpawnHazard(hazards, spawnPos, 3);
+    }
+}
 
         // RENDER
         
@@ -234,6 +315,15 @@ void startUnderwaterEscape(void) {
                 DrawCircleLines((int)hazards[i].position.x, (int)hazards[i].position.y, hazards[i].radius, LIGHTGRAY);
             }
         }
+
+        // Draw Score (Top-Left corner)
+    DrawText(TextFormat("SCORE: %05d", score), 20, 20, 20, RAYWHITE);
+
+    // Draw Game Over Screen overlay
+    if (gameOver) {
+    DrawText("GAME OVER", SCREEN_WIDTH / 2 - MeasureText("GAME OVER", 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, RED);
+    DrawText("Press 'R' to Restart", SCREEN_WIDTH / 2 - MeasureText("Press 'R' to Restart", 20) / 2, SCREEN_HEIGHT / 2 + 10, 20, RAYWHITE);
+    }   
         
 
         
