@@ -492,6 +492,13 @@ void startCannonThrow(void){
     int points = 0;
     int gameFinished = 0;
     int remainingObstacles = obstacleCount;
+    int highScore = 0;
+    int newHighScore = 0;
+    if (FileExists("cannon_highscore.txt")){
+        char *highScoreText = LoadFileText("cannon_highscore.txt");
+        highScore = TextToInteger(highScoreText);
+        UnloadFileText(highScoreText);
+    }
 
 	while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO))
 	{
@@ -569,14 +576,24 @@ void startCannonThrow(void){
                 }
             }
         }
-        if (remainingObstacles == 0)
+        if (remainingObstacles == 0){
             gameFinished = 1;
+            if (score > highScore){
+                highScore = score;
+                newHighScore = 1;
+                SaveFileText("cannon_highscore.txt", TextFormat("%d", highScore));
+            }
+        }
         if (!gameFinished){
             BeginDrawing();
             ClearBackground(BLACK);
             DrawText(TextFormat("Obstacle Set: %d", obstacleSet), SCREEN_WIDTH - 180, 20, 20, WHITE);     
             DrawText(TextFormat("Score: %d", score), 20, 20, 20, WHITE);
             DrawText(TextFormat("Time: %d", (int)timer), 20, 45, 20, WHITE);   
+            if (score > highScore)
+                DrawText("New High Score!", 20, 70, 20, GREEN);
+            else
+                DrawText(TextFormat("High Score: %d", highScore), 20, 70, 20, WHITE);
             DrawRectangleRec(ground, GRAY);
             DrawCircleV(Orb.position, projectileOrb_size, RED);
             DrawRectangleRec(cannonBase, BROWN);
@@ -595,6 +612,10 @@ void startCannonThrow(void){
             DrawText("GAME COMPLETE!", 300, 300, 70, WHITE);
             DrawText(TextFormat("Final Score: %d", score), 475, 390, 30, WHITE);
             DrawText(TextFormat("Final Time: %d seconds", (int)timer), 430, 430, 30, WHITE);
+            if (newHighScore)
+                DrawText("NEW HIGH SCORE!", 475, 470, 30, GREEN);
+            else
+                DrawText(TextFormat("High Score: %d", highScore), 475, 470, 30, WHITE);
             EndDrawing();
         }
 
