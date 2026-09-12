@@ -10,6 +10,8 @@
 
 #define colliderOrb_size 25.0f
 
+#define enemy_size 25.0f
+
 #define start
 
 #define maxSpeed 1000.0f
@@ -49,9 +51,9 @@ void startCollider(void)
     Rectangle ground = {0, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
     colliderOrb Orb;
     enemyOrb Enemy;
-    Enemy.position = (Vector2){1000, SCREEN_HEIGHT*2/3 - colliderOrb_size};
-    Enemy.velocity = (Vector2){-150, 0};
-    Enemy.mass = 1.0f;
+    Enemy.position = (Vector2){1100, SCREEN_HEIGHT*2/3 - colliderOrb_size};
+    Enemy.velocity = (Vector2){-GetRandomValue(100, 500), 0};
+    Enemy.mass = GetRandomValue(5, 50) / 10.0f;
     Enemy.active = 1;
 
     Orb.position = (Vector2){start_X,start_Y};
@@ -62,7 +64,8 @@ void startCollider(void)
     Color rec1 = GRAY;
     Color rec2 = GREEN;
     Color tempColor;
-    while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO))
+    int gameOver = 0;
+    while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)&& !gameOver)
     {
         float deltaTime = GetFrameTime();
 
@@ -77,7 +80,7 @@ void startCollider(void)
         float orbMomentum = Orb.mass * Orb.velocity.x;
         float enemyMomentum = Enemy.mass * -Enemy.velocity.x;
         if (Enemy.active){
-            Enemy.position.x += Enemy.velocity.x * deltaTime;
+            Enemy.position.x += (Enemy.velocity.x - Orb.velocity.x) * deltaTime;
         }
         groundPosition -= Orb.velocity.x * deltaTime;
         if (groundPosition <= -SCREEN_WIDTH) {
@@ -98,11 +101,22 @@ void startCollider(void)
                 Orb.inAir = 0;
             }
         }
-        if (Enemy.active && CheckCollisionCircles(Orb.position, colliderOrb_size, Enemy.position, colliderOrb_size)){
+        if (Enemy.active && CheckCollisionCircles(Orb.position, colliderOrb_size, Enemy.position, enemy_size)){
             if (Orb.mass * Orb.velocity.x > Enemy.mass * -Enemy.velocity.x){
                 Enemy.active = 0;
                 Orb.mass += Enemy.mass;
+                Enemy.position = (Vector2){1100, SCREEN_HEIGHT*2/3 - enemy_size};
+                Enemy.velocity = (Vector2){-GetRandomValue(100, 500), 0};
+                Enemy.mass = GetRandomValue(5, 50) / 10.0f;
+                Enemy.active = 1;
             }
+            else gameOver = 1;
+        }
+        if (Enemy.active && Enemy.position.x + enemy_size < 0){
+            Enemy.position = (Vector2){1100, SCREEN_HEIGHT*2/3 - enemy_size};
+            Enemy.velocity = (Vector2){-GetRandomValue(100, 500), 0};
+            Enemy.mass = GetRandomValue(5, 50) / 10.0f;
+            Enemy.active = 1;
         }
         BeginDrawing();
         ClearBackground(BLACK);
@@ -110,7 +124,7 @@ void startCollider(void)
         DrawRectangle(groundPosition + SCREEN_WIDTH, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3, rec2);
         DrawCircleV(Orb.position, colliderOrb_size, RED);
         if (Enemy.active)
-            DrawCircleV(Enemy.position, colliderOrb_size, PURPLE);
+            DrawCircleV(Enemy.position, enemy_size, PURPLE);
         DrawText(TextFormat("Momentum: %.0f", orbMomentum), Orb.position.x - 60, Orb.position.y - 50, 20, WHITE);
         if (Enemy.active){
             DrawText(TextFormat("Momentum: %.0f", enemyMomentum), Enemy.position.x - 60, Enemy.position.y - 50, 20, WHITE);
