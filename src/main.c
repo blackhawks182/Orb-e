@@ -30,6 +30,9 @@ void UnloadMenuFont(void);
 void LoadMenuBackground(void);
 void UnloadMenuBackground(void);
 
+void LoadTitleBackground(void);
+void UnloadTitleBackground(void);
+
 void LoadMenuMusic(void);
 void StartMenuMusic(void);
 void UpdateMenuMusic(void);
@@ -41,6 +44,7 @@ static void CloseMenuAndExit(void)
     StopMenuMusic();
     UnloadMenuMusic();
     UnloadMenuBackground();
+    UnloadTitleBackground();
     UnloadMenuFont();
     CloseAudioDevice();
     CloseWindow();
@@ -57,6 +61,7 @@ int main()
 
     LoadMenuFont();
     LoadMenuBackground();
+    LoadTitleBackground();
     LoadMenuMusic();
 
     GameState gameState = GAME_STATE_TITLE;

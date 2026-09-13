@@ -18,6 +18,9 @@ static bool menuMusicLoaded = false;
 static Texture2D menuBackground;
 static bool menuBackgroundLoaded = false;
 
+static Texture2D titleBackground;
+static bool titleBackgroundLoaded = false;
+
 static const Color menuButtonColor = { 4, 20, 52, 240 };
 static const Color menuSelectedButtonColor = { 5, 57, 87, 245 };
 static const Color menuBorderColor = { 116, 224, 240, 255 };
@@ -90,6 +93,21 @@ static const unsigned char menuBubbleAlpha[30] =
 void startCannonThrow(void);
 void startUnderwaterEscape(void);
 void startCollider(void);
+
+void LoadTitleBackground(void)
+{
+    titleBackground = LoadTexture("assets/title_background.png");
+    titleBackgroundLoaded = titleBackground.id != 0;
+}
+
+void UnloadTitleBackground(void)
+{
+    if (titleBackgroundLoaded)
+    {
+        UnloadTexture(titleBackground);
+        titleBackgroundLoaded = false;
+    }
+}
 
 void LoadMenuBackground(void)
 {
@@ -302,9 +320,9 @@ void UpdateTitleScreen(void)
 {
     titleTimer += GetFrameTime();
 
-    if (titleTimer >= 2.0f)
+    if (titleTimer >= 4.0f)
     {
-        titleTimer = 2.0f;
+        titleTimer = 4.0f;
         titleFinished = true;
     }
 }
@@ -324,7 +342,41 @@ void DrawTitleScreen(void)
     int x = (GetScreenWidth() - textWidth) / 2;
     int y = (GetScreenHeight() - fontSize) / 2;
 
-    ClearBackground(WHITE);
+    if (titleBackgroundLoaded)
+    {
+        float screenWidth = (float)GetScreenWidth();
+        float screenHeight = (float)GetScreenHeight();
+        float textureWidth = (float)titleBackground.width;
+        float textureHeight = (float)titleBackground.height;
+        float screenAspect = screenWidth / screenHeight;
+        float textureAspect = textureWidth / textureHeight;
+        Rectangle source = { 0.0f, 0.0f, textureWidth, textureHeight };
+
+        if (textureAspect > screenAspect)
+        {
+            source.width = textureHeight * screenAspect;
+            source.x = (textureWidth - source.width) / 2.0f;
+        }
+        else
+        {
+            source.height = textureWidth / screenAspect;
+            source.y = (textureHeight - source.height) / 2.0f;
+        }
+
+        DrawTexturePro(
+            titleBackground,
+            source,
+            (Rectangle){ 0.0f, 0.0f, screenWidth, screenHeight },
+            (Vector2){ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+    }
+    else
+    {
+        ClearBackground(WHITE);
+    }
+
     DrawText(title, x, y, fontSize, BLACK);
 }
 
