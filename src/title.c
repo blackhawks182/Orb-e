@@ -9,6 +9,10 @@ static bool mainMenuStart;
 
 static int gameSelection;
 static bool gameSelectionBack;
+static bool gameSelectionQuit;
+
+static Music menuMusic;
+static bool menuMusicLoaded = false;
 
 void startCannonThrow(void);
 void startUnderwaterEscape(void);
@@ -22,6 +26,57 @@ void LoadMenuFont(void)
 // No custom font needs to be unloaded.
 void UnloadMenuFont(void)
 {
+}
+
+// Load menu music.
+void LoadMenuMusic(void)
+{
+    menuMusic = LoadMusicStream("assets/menu_music.mp3");
+
+    if (IsAudioDeviceReady())
+    {
+        menuMusicLoaded = true;
+        SetMusicVolume(menuMusic, 0.5f);
+    }
+}
+
+// Start menu music from the beginning.
+void StartMenuMusic(void)
+{
+    if (menuMusicLoaded)
+    {
+        StopMusicStream(menuMusic);
+        SeekMusicStream(menuMusic, 0.0f);
+        PlayMusicStream(menuMusic);
+    }
+}
+
+// Update menu music every frame.
+void UpdateMenuMusic(void)
+{
+    if (menuMusicLoaded)
+    {
+        UpdateMusicStream(menuMusic);
+    }
+}
+
+// Stop menu music.
+void StopMenuMusic(void)
+{
+    if (menuMusicLoaded)
+    {
+        StopMusicStream(menuMusic);
+    }
+}
+
+// Unload menu music.
+void UnloadMenuMusic(void)
+{
+    if (menuMusicLoaded)
+    {
+        UnloadMusicStream(menuMusic);
+        menuMusicLoaded = false;
+    }
 }
 
 // Reset the title screen timer.
@@ -74,8 +129,10 @@ void ResetMainMenu(void)
 void UpdateMainMenu(void)
 {
     int buttonX = (GetScreenWidth() - 420) / 2;
+
     Rectangle startButton = { buttonX, 350, 420, 82 };
     Rectangle quitButton = { buttonX, 456, 420, 82 };
+
     Vector2 mouse = GetMousePosition();
     float wheel = GetMouseWheelMove();
     bool clicked = false;
@@ -89,6 +146,7 @@ void UpdateMainMenu(void)
     if (CheckCollisionPointRec(mouse, startButton))
     {
         mainMenuSelection = 0;
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             clicked = true;
     }
@@ -96,6 +154,7 @@ void UpdateMainMenu(void)
     if (CheckCollisionPointRec(mouse, quitButton))
     {
         mainMenuSelection = 1;
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             clicked = true;
     }
@@ -127,6 +186,7 @@ void DrawMainMenu(void)
     char *title = "ORB-E";
     char *startText = "START GAME";
     char *quitText = "QUIT GAME";
+
     int buttonX = (GetScreenWidth() - 420) / 2;
     int titleX = (GetScreenWidth() - MeasureText(title, 60)) / 2;
     int startX = buttonX + (420 - MeasureText(startText, 30)) / 2;
@@ -140,9 +200,21 @@ void DrawMainMenu(void)
     DrawRectangleLines(buttonX, 456, 420, 82, BLACK);
 
     if (mainMenuSelection == 0)
-        DrawRectangleLinesEx((Rectangle){ buttonX, 350, 420, 82 }, 3.0f, BLACK);
+    {
+        DrawRectangleLinesEx(
+            (Rectangle){ buttonX, 350, 420, 82 },
+            3.0f,
+            BLACK
+        );
+    }
     else
-        DrawRectangleLinesEx((Rectangle){ buttonX, 456, 420, 82 }, 3.0f, BLACK);
+    {
+        DrawRectangleLinesEx(
+            (Rectangle){ buttonX, 456, 420, 82 },
+            3.0f,
+            BLACK
+        );
+    }
 
     DrawText(startText, startX, 376, 30, BLACK);
     DrawText(quitText, quitX, 482, 30, BLACK);
@@ -153,31 +225,40 @@ void ResetGameSelection(void)
 {
     gameSelection = 0;
     gameSelectionBack = false;
+    gameSelectionQuit = false;
 }
 
 // Update Game Selection input.
 void UpdateGameSelection(void)
 {
     int buttonX = (GetScreenWidth() - 460) / 2;
+
     Rectangle cannonButton = { buttonX, 285, 460, 72 };
     Rectangle underwaterButton = { buttonX, 377, 460, 72 };
     Rectangle colliderButton = { buttonX, 469, 460, 72 };
+    Rectangle quitButton = { buttonX, 561, 460, 72 };
+
     Vector2 mouse = GetMousePosition();
     float wheel = GetMouseWheelMove();
     bool clicked = false;
 
     if (IsKeyPressed(KEY_UP) || wheel > 0.0f)
-        gameSelection = (gameSelection + 2) % 3;
+        gameSelection = (gameSelection + 3) % 4;
 
     if (IsKeyPressed(KEY_DOWN) || wheel < 0.0f)
-        gameSelection = (gameSelection + 1) % 3;
+        gameSelection = (gameSelection + 1) % 4;
 
+    // ESC returns to the Main Menu.
     if (IsKeyPressed(KEY_ESCAPE))
+    {
         gameSelectionBack = true;
+        StartMenuMusic();
+    }
 
     if (CheckCollisionPointRec(mouse, cannonButton))
     {
         gameSelection = 0;
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             clicked = true;
     }
@@ -185,6 +266,7 @@ void UpdateGameSelection(void)
     if (CheckCollisionPointRec(mouse, underwaterButton))
     {
         gameSelection = 1;
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             clicked = true;
     }
@@ -192,18 +274,46 @@ void UpdateGameSelection(void)
     if (CheckCollisionPointRec(mouse, colliderButton))
     {
         gameSelection = 2;
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            clicked = true;
+    }
+
+    if (CheckCollisionPointRec(mouse, quitButton))
+    {
+        gameSelection = 3;
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             clicked = true;
     }
 
     if (IsKeyPressed(KEY_ENTER) || clicked)
     {
+        if (gameSelection == 3)
+        {
+            gameSelectionQuit = true;
+            return;
+        }
+
+        // Stop menu music while the actual game is running.
+        StopMenuMusic();
+
         if (gameSelection == 0)
+        {
             startCannonThrow();
+        }
         else if (gameSelection == 1)
+        {
             startUnderwaterEscape();
+        }
         else
+        {
             startCollider();
+        }
+
+        // Game has ended.
+        // Stay on the Game Selection screen and restart the music.
+        StartMenuMusic();
     }
 }
 
@@ -213,6 +323,12 @@ bool IsGameSelectionReturnRequested(void)
     return gameSelectionBack;
 }
 
+// Check if Quit Game was selected on the Game Selection screen.
+bool IsGameSelectionQuitRequested(void)
+{
+    return gameSelectionQuit;
+}
+
 // Draw the Game Selection screen.
 void DrawGameSelection(void)
 {
@@ -220,11 +336,14 @@ void DrawGameSelection(void)
     char *cannonText = "Cannon Throw";
     char *underwaterText = "Underwater Escape";
     char *colliderText = "Collider";
+    char *quitText = "QUIT GAME";
+
     int buttonX = (GetScreenWidth() - 460) / 2;
     int titleX = (GetScreenWidth() - MeasureText(title, 40)) / 2;
     int cannonX = buttonX + (460 - MeasureText(cannonText, 28)) / 2;
     int underwaterX = buttonX + (460 - MeasureText(underwaterText, 28)) / 2;
     int colliderX = buttonX + (460 - MeasureText(colliderText, 28)) / 2;
+    int quitX = buttonX + (460 - MeasureText(quitText, 28)) / 2;
 
     ClearBackground(WHITE);
 
@@ -233,15 +352,43 @@ void DrawGameSelection(void)
     DrawRectangleLines(buttonX, 285, 460, 72, BLACK);
     DrawRectangleLines(buttonX, 377, 460, 72, BLACK);
     DrawRectangleLines(buttonX, 469, 460, 72, BLACK);
+    DrawRectangleLines(buttonX, 561, 460, 72, BLACK);
 
     if (gameSelection == 0)
-        DrawRectangleLinesEx((Rectangle){ buttonX, 285, 460, 72 }, 3.0f, BLACK);
+    {
+        DrawRectangleLinesEx(
+            (Rectangle){ buttonX, 285, 460, 72 },
+            3.0f,
+            BLACK
+        );
+    }
     else if (gameSelection == 1)
-        DrawRectangleLinesEx((Rectangle){ buttonX, 377, 460, 72 }, 3.0f, BLACK);
+    {
+        DrawRectangleLinesEx(
+            (Rectangle){ buttonX, 377, 460, 72 },
+            3.0f,
+            BLACK
+        );
+    }
+    else if (gameSelection == 2)
+    {
+        DrawRectangleLinesEx(
+            (Rectangle){ buttonX, 469, 460, 72 },
+            3.0f,
+            BLACK
+        );
+    }
     else
-        DrawRectangleLinesEx((Rectangle){ buttonX, 469, 460, 72 }, 3.0f, BLACK);
+    {
+        DrawRectangleLinesEx(
+            (Rectangle){ buttonX, 561, 460, 72 },
+            3.0f,
+            BLACK
+        );
+    }
 
     DrawText(cannonText, cannonX, 307, 28, BLACK);
     DrawText(underwaterText, underwaterX, 399, 28, BLACK);
     DrawText(colliderText, colliderX, 491, 28, BLACK);
+    DrawText(quitText, quitX, 583, 28, BLACK);
 }

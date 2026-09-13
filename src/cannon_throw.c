@@ -14,13 +14,11 @@
 
 #define projectileOrb_size 15.0f
 
-#define maxSpeed 1000.0f
+#define maxSpeed 300.0f
 
-#define speedSpeed 1666.6f
+#define speedSpeed 200.0f
 
 #define minSpeed 0.0f
-
-#define gravity 600.0f
 
 Vector2 rightEdgeMidpoint(Rectangle rect, Vector2 origin, float rotation)
 {
@@ -49,9 +47,10 @@ void startCannonThrow(void){
     Rectangle speedBar = {120, (SCREEN_HEIGHT*2/3) - 180, 100, 5};
 	Vector2 cannonRotationPoint = (Vector2){0.0f, 0.0f};
     int end_projectile_game = 0;
+    int orbInCannon = 1;
+    int orbInAir = 0;
     int barIncreasing = 1;
 	float rotation = 0.0f;
-    float launchAngle = 0.0f;
     float launchSpeed = 0.0f;
     projectileOrb Orb;
     Orb.inAir = 0;
@@ -67,21 +66,7 @@ void startCannonThrow(void){
         if (IsKeyDown(KEY_Z) && !Orb.inAir) 
             if (launchSpeed <= maxSpeed && barIncreasing) launchSpeed += speedSpeed*deltaTime;
             else if (launchSpeed >= minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
-        if (IsKeyReleased(KEY_Z) && !Orb.inAir) {
-            Orb.inAir = 1;
-            launchAngle = rotation;
-            Orb.velocity.x = launchSpeed*cosf(launchAngle*DEG2RAD);
-            Orb.velocity.y = launchSpeed*sinf(launchAngle*DEG2RAD) - gravity*deltaTime;
-        }
-        if (Orb.inAir){
-            Orb.velocity.y += gravity*deltaTime;
-            Orb.position.x += Orb.velocity.x * deltaTime;
-            Orb.position.y += Orb.velocity.y *deltaTime;
-        }
-        if (Orb.inAir && Orb.position.x > SCREEN_WIDTH + projectileOrb_size || Orb.position.y > SCREEN_HEIGHT*2/3 - projectileOrb_size){
-            Orb.inAir = 0;
-            launchSpeed = 0;
-        }
+        if (IsKeyReleased(KEY_Z) && !Orb.inAir) Orb.inAir = 1;
         if(!Orb.inAir){
             speedBar.width = (100*launchSpeed/maxSpeed);
             Orb.position = rightEdgeMidpoint(cannonBody, cannonRotationPoint, rotation);
