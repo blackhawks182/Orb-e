@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdio.h>
 
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 800
@@ -12,6 +13,9 @@
 #define SHURIKEN_SPEED 700.0f
 #define SHURIKEN_LIFETIME 1.5f // Seconds before a shuriken disappears
 #define MAX_HAZARDS 100
+#define MAX_LIVES 3
+#define INVULNERABILITY_TIME 2.0f // Invulnerability duration after getting hit
+#define HIGHSCORE_FILE "highscore.txt"
 
 typedef struct Orb {
     Vector2 position;
@@ -31,7 +35,6 @@ typedef struct Hazard {
     Vector2 position;
     Vector2 velocity;
     float radius;
-    int sizeClass; // 3 = Large, 2 = Medium, 1 = Small
     bool active;
 } Hazard;
 
@@ -44,22 +47,40 @@ void WrapPosition(Vector2 *pos, float margin) {
 }
 
 // Helper to spawn a single sphere hazard
-void SpawnHazard(Hazard *hazards, Vector2 pos, int sizeClass) {
+void SpawnHazard(Hazard *hazards, Vector2 pos) {
     for (int i = 0; i < MAX_HAZARDS; i++) {
         if (!hazards[i].active) {
             hazards[i].position = pos;
             
-            // Random angle and size-based speed (smaller spheres move faster)
             float angle = GetRandomValue(0, 360) * DEG2RAD;
-            float speed = GetRandomValue(80, 150) / (float)sizeClass; 
+            float speed = (float)GetRandomValue(80, 150); 
             hazards[i].velocity = (Vector2){ cosf(angle) * speed, sinf(angle) * speed };
             
-            hazards[i].sizeClass = sizeClass;
-            hazards[i].radius = sizeClass * 15.0f;
+            hazards[i].radius = 45.0f; // Fixed size (3 * 15.0f)
             hazards[i].active = true;
             break;
         }
     }
+}
+
+// Helper to load high score from file
+int LoadHighScore(void) {
+    if (FileExists(HIGHSCORE_FILE)) {
+        char *fileText = LoadFileText(HIGHSCORE_FILE);
+        if (fileText != NULL) {
+            int score = atoi(fileText);
+            UnloadFileText(fileText);
+            return score;
+        }
+    }
+    return 0;
+}
+
+// Helper to save high score to file
+void SaveHighScore(int score) {
+    char scoreStr[16];
+    snprintf(scoreStr, sizeof(scoreStr), "%d", score);
+    SaveFileText(HIGHSCORE_FILE, scoreStr);
 }
 
 
@@ -73,9 +94,12 @@ void startUnderwaterEscape(void) {
 
     Shuriken shurikens[MAX_SHURIKENS] = {0};
     Hazard hazards[MAX_HAZARDS] = {0};
-
+    int highScore = LoadHighScore(); // Read persisted high score from file
+    int lives = MAX_LIVES;
+    float invulnerableTimer = 0.0f; 
     int score = 0;
     bool gameOver = false;
+
      // Spawn 6 initial large hazards at a safe distance from player center (150px buffer)
     for (int i = 0; i < 6; i++) {
         Vector2 spawnPos;
@@ -83,7 +107,7 @@ void startUnderwaterEscape(void) {
             spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
         } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius));
         
-        SpawnHazard(hazards, spawnPos, 3);
+        SpawnHazard(hazards, spawnPos);
     }
 
 
@@ -91,7 +115,10 @@ void startUnderwaterEscape(void) {
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)) {
 		float dt = GetFrameTime();
 
-        
+        // Update invulnerability timer
+    if (invulnerableTimer > 0.0f) {
+        invulnerableTimer -= dt;
+    }
         // UPDATE MOVEMENT 
         
         Vector2 movement = { 0.0f, 0.0f };
@@ -131,7 +158,7 @@ void startUnderwaterEscape(void) {
 		
         // FIRING SHURIKENS
 
-        if (IsKeyPressed(KEY_SPACE)) {
+        if (IsKeyPressed(KEY_SPACE) && !gameOver) {
             for (int i = 0; i < MAX_SHURIKENS; i++) {
                 if (!shurikens[i].active) {
                     // Position shuriken slightly outward at the tip of the ship
@@ -209,6 +236,10 @@ void startUnderwaterEscape(void) {
 
                 // Award points
                 score += 100;
+                if (score > highScore) {
+                highScore = score;
+                SaveHighScore(highScore); // Write updated high score to file
+                }
 
                 // Instant Disintegration: Deactivate hazard immediately with no fading
                 hazards[j].active = false;
@@ -220,41 +251,55 @@ void startUnderwaterEscape(void) {
 
     
     // CHECK COLLISIONS: PLAYER vs HAZARD
-    
-    for (int i = 0; i < MAX_HAZARDS; i++) {
-        if (hazards[i].active) {
-            if (CheckCollisionCircles(player.position, player.radius, hazards[i].position, hazards[i].radius)) {
-                gameOver = true;
-                break;
+            if (invulnerableTimer <= 0.0f) {
+                for (int i = 0; i < MAX_HAZARDS; i++) {
+                    if (hazards[i].active) {
+                        if (CheckCollisionCircles(player.position, player.radius, hazards[i].position, hazards[i].radius)) {
+                            lives--;
+                            if (lives <= 0) {
+                                gameOver = true;
+                            } else {
+                                player.position = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+                                invulnerableTimer = INVULNERABILITY_TIME;
+                            }
+                            break;
+                        }
+                    }
+                }
             }
+        }
+
+        // Active Hazards and Respawn Logic
+if (!gameOver) {
+    // 1. Check active hazard count
+    int activeHazardCount = 0;
+    for (int i = 0; i < MAX_HAZARDS; i++) {
+        if (hazards[i].active) activeHazardCount++;
+    }
+
+    // 2. Respawn if hazards are too low
+    if (activeHazardCount <= 3) {
+        for (int i = 0; i < 3; i++) {
+            Vector2 spawnPos;
+            int attempts = 0; // Prevent infinite loop
+
+            do {
+                spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+                attempts++;
+            } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius) && attempts < 100);
+            
+            SpawnHazard(hazards, spawnPos);
         }
     }
 }
-
-// AUTO-RESPAWN: Check if active hazards dropped to 3 or fewer
-        int activeHazardCount = 0;
-        for (int i = 0; i < MAX_HAZARDS; i++) {
-            if (hazards[i].active) {
-                activeHazardCount++;
-            }
-        }
-
-        // If active hazards <= 3, spawn 3 new large hazards safely away from player
-        if (activeHazardCount <= 3) {
-            for (int i = 0; i < 3; i++) {
-                Vector2 spawnPos;
-                do {
-                    spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
-                } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius));
-                
-                SpawnHazard(hazards, spawnPos, 3);
-            }
-        }
 
 if (gameOver && IsKeyPressed(KEY_R)) {
     // Reset player position
     player.position = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
     score = 0;
+    highScore = LoadHighScore();
+    lives = MAX_LIVES;
+    invulnerableTimer = 0.0f;
     gameOver = false;
 
     // Clear all existing shurikens and hazards
@@ -263,13 +308,15 @@ if (gameOver && IsKeyPressed(KEY_R)) {
 
     // Respawn 5 initial safe hazards
     for (int i = 0; i < 5; i++) {
-        Vector2 spawnPos;
-        do {
-            spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
-        } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius));
-        
-        SpawnHazard(hazards, spawnPos, 3);
-    }
+                Vector2 spawnPos;
+                int attempts = 0;
+                do {
+                    spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+                    attempts++;
+                } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius) && attempts < 100);
+                
+                SpawnHazard(hazards, spawnPos);
+            }
 }
 
         // RENDER
@@ -293,6 +340,7 @@ if (gameOver && IsKeyPressed(KEY_R)) {
 
 
         // Draw Orb Body
+        if (invulnerableTimer <= 0.0f || (int)(invulnerableTimer * 10) % 2 == 0) {
         DrawCircleV(player.position, player.radius, RAYWHITE);
 
         // Draw Reactor Core Visual
@@ -304,6 +352,7 @@ if (gameOver && IsKeyPressed(KEY_R)) {
             player.position.y + forward.y * player.radius
         };
         DrawLineEx(player.position, noseLineEnd, 3.0f, RED);
+    }
 
         // Draw Active Hazards (Spheres)
         for (int i = 0; i < MAX_HAZARDS; i++) {
@@ -316,14 +365,20 @@ if (gameOver && IsKeyPressed(KEY_R)) {
             }
         }
 
-        // Draw Score (Top-Left corner)
-    DrawText(TextFormat("SCORE: %05d", score), 20, 20, 20, RAYWHITE);
+        // Draw UI Elements
+        DrawText(TextFormat("SCORE: %05d", score), 20, 20, 20, RAYWHITE);
+        DrawText(TextFormat("HIGH SCORE: %05d", highScore), 20, 50, 20, YELLOW);
 
-    // Draw Game Over Screen overlay
-    if (gameOver) {
-    DrawText("GAME OVER", SCREEN_WIDTH / 2 - MeasureText("GAME OVER", 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, RED);
-    DrawText("Press 'R' to Restart", SCREEN_WIDTH / 2 - MeasureText("Press 'R' to Restart", 20) / 2, SCREEN_HEIGHT / 2 + 10, 20, RAYWHITE);
-    }   
+        DrawText("LIVES:", 20, 80, 20, RAYWHITE);
+        for (int i = 0; i < lives; i++) {
+            DrawCircle(100 + (i * 25), 90, 8, RAYWHITE);
+        }
+
+        // Draw Game Over Screen overlay
+        if (gameOver) {
+            DrawText("GAME OVER", SCREEN_WIDTH / 2 - MeasureText("GAME OVER", 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, RED);
+            DrawText("Press 'R' to Restart", SCREEN_WIDTH / 2 - MeasureText("Press 'R' to Restart", 20) / 2, SCREEN_HEIGHT / 2 + 10, 20, RAYWHITE);
+        }
         
 
         
