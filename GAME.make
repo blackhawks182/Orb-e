@@ -118,10 +118,16 @@ endif
 GENERATED :=
 OBJECTS :=
 
-GENERATED += $(OBJDIR)/Escape_water.o
-GENERATED += $(OBJDIR)/projectile.o
-OBJECTS += $(OBJDIR)/Escape_water.o
-OBJECTS += $(OBJDIR)/projectile.o
+GENERATED += $(OBJDIR)/cannon_throw.o
+GENERATED += $(OBJDIR)/collider.o
+GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/title.o
+GENERATED += $(OBJDIR)/underwater_escape.o
+OBJECTS += $(OBJDIR)/cannon_throw.o
+OBJECTS += $(OBJDIR)/collider.o
+OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/title.o
+OBJECTS += $(OBJDIR)/underwater_escape.o
 
 # Rules
 # #############################################
@@ -185,10 +191,19 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/Escape_water.o: src/Escape_water.c
+$(OBJDIR)/cannon_throw.o: src/cannon_throw.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/projectile.o: src/projectile.c
+$(OBJDIR)/collider.o: src/collider.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/main.o: src/main.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/title.o: src/title.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/underwater_escape.o: src/underwater_escape.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
