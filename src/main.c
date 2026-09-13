@@ -27,6 +27,9 @@ bool IsGameSelectionQuitRequested(void);
 void LoadMenuFont(void);
 void UnloadMenuFont(void);
 
+void LoadMenuBackground(void);
+void UnloadMenuBackground(void);
+
 void LoadMenuMusic(void);
 void StartMenuMusic(void);
 void UpdateMenuMusic(void);
@@ -37,6 +40,7 @@ static void CloseMenuAndExit(void)
 {
     StopMenuMusic();
     UnloadMenuMusic();
+    UnloadMenuBackground();
     UnloadMenuFont();
     CloseAudioDevice();
     CloseWindow();
@@ -52,6 +56,7 @@ int main()
     InitAudioDevice();
 
     LoadMenuFont();
+    LoadMenuBackground();
     LoadMenuMusic();
 
     GameState gameState = GAME_STATE_TITLE;
