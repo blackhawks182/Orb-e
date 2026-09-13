@@ -57,6 +57,11 @@ void startCannonThrow(void){
     int obstacleSet = GetRandomValue(0, 9);
     int obstacleCount = 0;
 
+    Sound releaseSound = LoadSound("assets/release.mp3");
+    Sound hitSound = LoadSound("assets/hit.mp3");
+    SetSoundVolume(releaseSound, 0.5f);
+    SetSoundVolume(hitSound, 0.3f);
+
     if (obstacleSet == 0){
         obstacleCount = 5;
 
@@ -515,6 +520,7 @@ void startCannonThrow(void){
             if (launchSpeed <= maxSpeed && barIncreasing) launchSpeed += speedSpeed*deltaTime;
             else if (launchSpeed >= minSpeed && !barIncreasing) launchSpeed -= speedSpeed*deltaTime;
         if (IsKeyReleased(KEY_Z) && !Orb.inAir) {
+            PlaySound(releaseSound);
             Orb.inAir = 1;
             launchAngle = rotation;
             Orb.velocity.x = launchSpeed*cosf(launchAngle*DEG2RAD);
@@ -526,6 +532,7 @@ void startCannonThrow(void){
             Orb.position.y += Orb.velocity.y *deltaTime;
             for (int i = 0; i <= obstacleCount-1; i++){
                 if (obstacles[i].active && CheckCollisionCircleRec(Orb.position, projectileOrb_size, obstacles[i].rectangle)){
+                    PlaySound(hitSound);
                     obstacles[i].active = 0;
                     Orb.inAir = 0;
                     launchSpeed = 0;
@@ -620,4 +627,6 @@ void startCannonThrow(void){
         }
 
 	}
+    UnloadSound(releaseSound);
+    UnloadSound(hitSound);
 }
