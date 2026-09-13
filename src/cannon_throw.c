@@ -587,7 +587,18 @@ void startCannonThrow(void){
                 DrawText("NEW HIGH SCORE!", 475, 470, 30, GREEN);
             else
                 DrawText(TextFormat("High Score: %d", highScore), 475, 470, 30, WHITE);
+            DrawText("Press R to restart", 485, 530, 25, WHITE);
+            DrawText("Press ENTER to exit", 475, 565, 25, WHITE);
             EndDrawing();
+            if (IsKeyPressed(KEY_R)){
+                UnloadSound(releaseSound);
+                UnloadSound(hitSound);
+                startCannonThrow();
+                return;
+            }
+            if (IsKeyPressed(KEY_ENTER)){
+                break;
+            }
         }
 
 	}
