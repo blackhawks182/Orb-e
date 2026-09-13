@@ -115,142 +115,115 @@ void startUnderwaterEscape(void) {
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)) {
 		float dt = GetFrameTime();
 
-        // Update invulnerability timer
-    if (invulnerableTimer > 0.0f) {
-        invulnerableTimer -= dt;
-    }
-        // UPDATE MOVEMENT 
-        
-        Vector2 movement = { 0.0f, 0.0f };
+               if (!gameOver) {
+            // Update invulnerability timer
+            if (invulnerableTimer > 0.0f) {
+                invulnerableTimer -= dt;
+            }
 
-        // Check horizontal movement
-        if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))  movement.x -= 1.0f;
-        if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) movement.x += 1.0f;
+            // UPDATE MOVEMENT 
+            Vector2 movement = { 0.0f, 0.0f };
 
-        // Check vertical movement
-        if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))    movement.y -= 1.0f;
-        if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))  movement.y += 1.0f;
+            if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))  movement.x -= 1.0f;
+            if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) movement.x += 1.0f;
+            if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))    movement.y -= 1.0f;
+            if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))  movement.y += 1.0f;
 
-        // If moving, apply normalization and update position/rotation
-        if (movement.x != 0.0f || movement.y != 0.0f) {
-            // Normalize the vector so diagonal movement isn't faster (traveling at sqrt(2))
-            float length = sqrtf(movement.x * movement.x + movement.y * movement.y);
-            movement.x /= length;
-            movement.y /= length;
+            if (movement.x != 0.0f || movement.y != 0.0f) {
+                float length = sqrtf(movement.x * movement.x + movement.y * movement.y);
+                movement.x /= length;
+                movement.y /= length;
 
-            // Direct position modification (no acceleration or drift)
-            player.position.x += movement.x * MOVE_SPEED * dt;
-            player.position.y += movement.y * MOVE_SPEED * dt;
+                player.position.x += movement.x * MOVE_SPEED * dt;
+                player.position.y += movement.y * MOVE_SPEED * dt;
 
-            // Update rotation based on your move direction so the weapon face aligns
-            // atan2f returns radians; we convert to degrees and adjust by +90 so 0 is up
-            player.rotation = (atan2f(movement.y, movement.x) * RAD2DEG) + 90.0f;
-        }
+                player.rotation = (atan2f(movement.y, movement.x) * RAD2DEG) + 90.0f;
+            }
 
-        // Screen edge wrapping
-        WrapPosition(&player.position, player.radius);
-		// Compute forward facing vector to draw the direction indicator line
-        Vector2 forward = { 
-            cosf((player.rotation - 90.0f) * DEG2RAD), 
-            sinf((player.rotation - 90.0f) * DEG2RAD) 
-        };
+            // Screen edge wrapping
+            WrapPosition(&player.position, player.radius);
 
-		
-        // FIRING SHURIKENS
+            // Compute forward facing vector
+            Vector2 forward = { 
+                cosf((player.rotation - 90.0f) * DEG2RAD), 
+                sinf((player.rotation - 90.0f) * DEG2RAD) 
+            };
 
-        if (IsKeyPressed(KEY_SPACE) && !gameOver) {
+            // FIRING SHURIKENS
+            if (IsKeyPressed(KEY_SPACE)) {
+                for (int i = 0; i < MAX_SHURIKENS; i++) {
+                    if (!shurikens[i].active) {
+                        shurikens[i].position = (Vector2){
+                            player.position.x + forward.x * player.radius,
+                            player.position.y + forward.y * player.radius
+                        };
+                        
+                        shurikens[i].velocity = (Vector2){
+                            forward.x * SHURIKEN_SPEED,
+                            forward.y * SHURIKEN_SPEED
+                        };
+                        
+                        shurikens[i].lifeTime = SHURIKEN_LIFETIME;
+                        shurikens[i].rotation = 0.0f;
+                        shurikens[i].active = true;
+                        break; 
+                    }
+                }
+            }
+
+            // UPDATE PROJECTILES
             for (int i = 0; i < MAX_SHURIKENS; i++) {
-                if (!shurikens[i].active) {
-                    // Position shuriken slightly outward at the tip of the ship
-                    shurikens[i].position = (Vector2){
-                        player.position.x + forward.x * player.radius,
-                        player.position.y + forward.y * player.radius
-                    };
+                if (shurikens[i].active) {
+                    shurikens[i].position.x += shurikens[i].velocity.x * dt;
+                    shurikens[i].position.y += shurikens[i].velocity.y * dt;
+                    shurikens[i].rotation += 720.0f * dt;
                     
-                    // Match the trajectory velocity with weapon speeds
-                    shurikens[i].velocity = (Vector2){
-                        forward.x * SHURIKEN_SPEED,
-                        forward.y * SHURIKEN_SPEED
-                    };
-                    
-                    shurikens[i].lifeTime = SHURIKEN_LIFETIME;
-                    shurikens[i].rotation = 0.0f;
-                    shurikens[i].active = true;
-                    break; // Found an empty slot, stop looking!
+                    float margin = 25.0f;
+                    if (shurikens[i].position.x < -margin || 
+                        shurikens[i].position.x > SCREEN_WIDTH + margin || 
+                        shurikens[i].position.y < -margin || 
+                        shurikens[i].position.y > SCREEN_HEIGHT + margin) 
+                    {
+                        shurikens[i].active = false;
+                    }
+
+                    shurikens[i].lifeTime -= dt;
+                    if (shurikens[i].lifeTime <= 0) {
+                        shurikens[i].active = false;
+                    }
                 }
             }
-        }
 
-        // UPDATE PROJECTILES
-        
-        for (int i = 0; i < MAX_SHURIKENS; i++) {
-            if (shurikens[i].active) {
-                // Update translation positions
-                shurikens[i].position.x += shurikens[i].velocity.x * dt;
-                shurikens[i].position.y += shurikens[i].velocity.y * dt;
-                
-                // Spin the shuriken graphic rapidly over time (720 degrees per second)
-                shurikens[i].rotation += 720.0f * dt;
-                
-                // Deactivate shuriken if it goes off-screen
-                float margin = 25.0f; // Matches shuriken size so it clears the screen fully before vanishing
-                if (shurikens[i].position.x < -margin || 
-                     shurikens[i].position.x > SCREEN_WIDTH + margin || 
-                     shurikens[i].position.y < -margin || 
-                     shurikens[i].position.y > SCREEN_HEIGHT + margin) 
-                     {
-                       shurikens[i].active = false;
-                     }
-
-                // Age the shuriken and disable if lifespan runs out
-                shurikens[i].lifeTime -= dt;
-                if (shurikens[i].lifeTime <= 0) {
-                    shurikens[i].active = false;
+            // UPDATE HAZARDS
+            for (int i = 0; i < MAX_HAZARDS; i++) {
+                if (hazards[i].active) {
+                    hazards[i].position.x += hazards[i].velocity.x * dt;
+                    hazards[i].position.y += hazards[i].velocity.y * dt;
+                    WrapPosition(&hazards[i].position, hazards[i].radius);
                 }
             }
-        }
 
-        // Update Hazards movement
-        for (int i = 0; i < MAX_HAZARDS; i++) {
-            if (hazards[i].active) {
-                hazards[i].position.x += hazards[i].velocity.x * dt;
-                hazards[i].position.y += hazards[i].velocity.y * dt;
-                WrapPosition(&hazards[i].position, hazards[i].radius);
-            }
-        }
+            // COLLISIONS: SHURIKEN vs HAZARD
+            for (int i = 0; i < MAX_SHURIKENS; i++) {
+                if (!shurikens[i].active) continue;
 
-        if (!gameOver) {
-          // CHECK COLLISIONS: SHURIKEN vs HAZARD
-    
-    for (int i = 0; i < MAX_SHURIKENS; i++) {
-        if (!shurikens[i].active) continue;
+                for (int j = 0; j < MAX_HAZARDS; j++) {
+                    if (!hazards[j].active) continue;
 
-        for (int j = 0; j < MAX_HAZARDS; j++) {
-            if (!hazards[j].active) continue;
-
-            // Simple circle collision check
-            if (CheckCollisionCircles(shurikens[i].position, 12.5f, hazards[j].position, hazards[j].radius)) {
-                
-                // Destroy shuriken
-                shurikens[i].active = false;
-
-                // Award points
-                score += 100;
-                if (score > highScore) {
-                highScore = score;
-                SaveHighScore(highScore); // Write updated high score to file
+                    if (CheckCollisionCircles(shurikens[i].position, 12.5f, hazards[j].position, hazards[j].radius)) {
+                        shurikens[i].active = false;
+                        score += 100;
+                        if (score > highScore) {
+                            highScore = score;
+                            SaveHighScore(highScore);
+                        }
+                        hazards[j].active = false;
+                        break; 
+                    }
                 }
-
-                // Instant Disintegration: Deactivate hazard immediately with no fading
-                hazards[j].active = false;
-
-                break; // Stop checking this shuriken against other hazards
             }
-        }
-    }
 
-    
-    // CHECK COLLISIONS: PLAYER vs HAZARD
+            // COLLISIONS: PLAYER vs HAZARD
             if (invulnerableTimer <= 0.0f) {
                 for (int i = 0; i < MAX_HAZARDS; i++) {
                     if (hazards[i].active) {
@@ -267,121 +240,115 @@ void startUnderwaterEscape(void) {
                     }
                 }
             }
-        }
 
-        // Active Hazards and Respawn Logic
-if (!gameOver) {
-    // 1. Check active hazard count
-    int activeHazardCount = 0;
-    for (int i = 0; i < MAX_HAZARDS; i++) {
-        if (hazards[i].active) activeHazardCount++;
-    }
-
-    // 2. Respawn if hazards are too low
-    if (activeHazardCount <= 3) {
-        for (int i = 0; i < 3; i++) {
-            Vector2 spawnPos;
-            int attempts = 0; // Prevent infinite loop
-
-            do {
-                spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
-                attempts++;
-            } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius) && attempts < 100);
-            
-            SpawnHazard(hazards, spawnPos);
-        }
-    }
-}
-
-if (gameOver && IsKeyPressed(KEY_R)) {
-    // Reset player position
-    player.position = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-    score = 0;
-    highScore = LoadHighScore();
-    lives = MAX_LIVES;
-    invulnerableTimer = 0.0f;
-    gameOver = false;
-
-    // Clear all existing shurikens and hazards
-    for (int i = 0; i < MAX_SHURIKENS; i++) shurikens[i].active = false;
-    for (int i = 0; i < MAX_HAZARDS; i++) hazards[i].active = false;
-
-    // Respawn 5 initial safe hazards
-    for (int i = 0; i < 5; i++) {
-                Vector2 spawnPos;
-                int attempts = 0;
-                do {
-                    spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
-                    attempts++;
-                } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius) && attempts < 100);
-                
-                SpawnHazard(hazards, spawnPos);
+            // RESPAWN HAZARDS
+            int activeHazardCount = 0;
+            for (int i = 0; i < MAX_HAZARDS; i++) {
+                if (hazards[i].active) activeHazardCount++;
             }
-}
+
+            if (activeHazardCount <= 3) {
+                for (int i = 0; i < 3; i++) {
+                    Vector2 spawnPos;
+                    int attempts = 0;
+
+                    do {
+                        spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+                        attempts++;
+                    } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius) && attempts < 100);
+                    
+                    SpawnHazard(hazards, spawnPos);
+                }
+            }
+        } 
+        else {
+            // RESTART LOGIC WHEN IN GAME OVER STATE
+            if (IsKeyPressed(KEY_R)) {
+                player.position = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+                score = 0;
+                highScore = LoadHighScore();
+                lives = MAX_LIVES;
+                invulnerableTimer = 0.0f;
+                gameOver = false;
+
+                for (int i = 0; i < MAX_SHURIKENS; i++) shurikens[i].active = false;
+                for (int i = 0; i < MAX_HAZARDS; i++) hazards[i].active = false;
+
+                for (int i = 0; i < 6; i++) {
+                    Vector2 spawnPos;
+                    int attempts = 0;
+                    do {
+                        spawnPos = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
+                        attempts++;
+                    } while (CheckCollisionCircles(spawnPos, 150.0f, player.position, player.radius) && attempts < 100);
+                    
+                    SpawnHazard(hazards, spawnPos);
+                }
+            }
+        }
 
         // RENDER
         
-        BeginDrawing();
-        ClearBackground(BLUE);
+       BeginDrawing();
+       ClearBackground(BLUE);
 
-		// Draw Active Shurikens
-        for (int i = 0; i < MAX_SHURIKENS; i++) {
-            if (shurikens[i].active) {
-                float shurikenSize = 25.0f;
-
-                // Outer 4-pointed red blade structure
-                DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, BLACK);
-
-                // Center contrasting rings
-                DrawCircleV(shurikens[i].position, 4.0f, MAROON);
-                DrawCircleV(shurikens[i].position, 2.0f, ORANGE);
+        if (!gameOver) {
+            // Draw Active Shurikens
+            for (int i = 0; i < MAX_SHURIKENS; i++) {
+                if (shurikens[i].active) {
+                    float shurikenSize = 25.0f;
+                    DrawPoly(shurikens[i].position, 4, shurikenSize, shurikens[i].rotation, BLACK);
+                    DrawCircleV(shurikens[i].position, 4.0f, MAROON);
+                    DrawCircleV(shurikens[i].position, 2.0f, ORANGE);
+                }
             }
-        }
 
+            // Draw Orb Body
+            if (invulnerableTimer <= 0.0f || (int)(invulnerableTimer * 10) % 2 == 0) {
+                DrawCircleV(player.position, player.radius, RAYWHITE);
+                DrawCircleV(player.position, player.radius * 0.35f, GetColor(0xF2BE44FF));
 
-        // Draw Orb Body
-        if (invulnerableTimer <= 0.0f || (int)(invulnerableTimer * 10) % 2 == 0) {
-        DrawCircleV(player.position, player.radius, RAYWHITE);
-
-        // Draw Reactor Core Visual
-       DrawCircleV(player.position, player.radius * 0.35f, GetColor(0xF2BE44FF));
-
-        // Draw Nose Direction Pointer Line (points where you are currently traveling)
-        Vector2 noseLineEnd = {
-            player.position.x + forward.x * player.radius,
-            player.position.y + forward.y * player.radius
-        };
-        DrawLineEx(player.position, noseLineEnd, 3.0f, RED);
-    }
-
-        // Draw Active Hazards (Spheres)
-        for (int i = 0; i < MAX_HAZARDS; i++) {
-            if (hazards[i].active) {
-                // Outer main circle
-                DrawCircleV(hazards[i].position, hazards[i].radius, GRAY);
-                
-                // Outer ring outline for visual clarity
-                DrawCircleLines((int)hazards[i].position.x, (int)hazards[i].position.y, hazards[i].radius, LIGHTGRAY);
+                Vector2 forward = { 
+                    cosf((player.rotation - 90.0f) * DEG2RAD), 
+                    sinf((player.rotation - 90.0f) * DEG2RAD) 
+                };
+                Vector2 noseLineEnd = {
+                    player.position.x + forward.x * player.radius,
+                    player.position.y + forward.y * player.radius
+                };
+                DrawLineEx(player.position, noseLineEnd, 3.0f, RED);
             }
+
+            // Draw Active Hazards
+            for (int i = 0; i < MAX_HAZARDS; i++) {
+                if (hazards[i].active) {
+                    DrawCircleV(hazards[i].position, hazards[i].radius, GRAY);
+                    DrawCircleLines((int)hazards[i].position.x, (int)hazards[i].position.y, hazards[i].radius, LIGHTGRAY);
+                }
+            }
+
+            // Draw Gameplay UI
+            DrawText(TextFormat("SCORE: %05d", score), 20, 20, 20, RAYWHITE);
+            DrawText(TextFormat("HIGH SCORE: %05d", highScore), 20, 50, 20, YELLOW);
+
+            DrawText("LIVES:", 20, 80, 20, RAYWHITE);
+            for (int i = 0; i < lives; i++) {
+                DrawCircle(100 + (i * 25), 90, 8, RAYWHITE);
+            }
+        } 
+        else {
+            // Dedicated Game Over Screen (Clean blue screen with text only)
+            const char *gameOverText = "GAME OVER";
+            const char *scoreText = TextFormat("FINAL SCORE: %05d", score);
+            const char *highScoreText = TextFormat("HIGH SCORE: %05d", highScore);
+            const char *restartText = "Press 'R' to Restart";
+
+            DrawText(gameOverText, SCREEN_WIDTH / 2 - MeasureText(gameOverText, 50) / 2, SCREEN_HEIGHT / 2 - 80, 50, RED);
+            DrawText(scoreText, SCREEN_WIDTH / 2 - MeasureText(scoreText, 24) / 2, SCREEN_HEIGHT / 2 - 10, 24, RAYWHITE);
+            DrawText(highScoreText, SCREEN_WIDTH / 2 - MeasureText(highScoreText, 24) / 2, SCREEN_HEIGHT / 2 + 25, 24, YELLOW);
+            DrawText(restartText, SCREEN_WIDTH / 2 - MeasureText(restartText, 20) / 2, SCREEN_HEIGHT / 2 + 80, 20, LIGHTGRAY);
         }
 
-        // Draw UI Elements
-        DrawText(TextFormat("SCORE: %05d", score), 20, 20, 20, RAYWHITE);
-        DrawText(TextFormat("HIGH SCORE: %05d", highScore), 20, 50, 20, YELLOW);
-
-        DrawText("LIVES:", 20, 80, 20, RAYWHITE);
-        for (int i = 0; i < lives; i++) {
-            DrawCircle(100 + (i * 25), 90, 8, RAYWHITE);
-        }
-
-        // Draw Game Over Screen overlay
-        if (gameOver) {
-            DrawText("GAME OVER", SCREEN_WIDTH / 2 - MeasureText("GAME OVER", 40) / 2, SCREEN_HEIGHT / 2 - 40, 40, RED);
-            DrawText("Press 'R' to Restart", SCREEN_WIDTH / 2 - MeasureText("Press 'R' to Restart", 20) / 2, SCREEN_HEIGHT / 2 + 10, 20, RAYWHITE);
-        }
-        
-
-        
         EndDrawing();
     }
 }
