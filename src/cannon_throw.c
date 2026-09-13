@@ -26,6 +26,9 @@ void startCannonThrow(void){
     SetSoundVolume(releaseSound, 0.5f);
     SetSoundVolume(hitSound, 0.3f);
 
+    Texture2D groundTexture = LoadTexture("assets/cannon_throw_ground.png");
+    Texture2D backgroundTexture = LoadTexture("assets/cannon_throw_background.png");
+
     if (obstacleSet == 0){
         obstacleCount = 5;
 
@@ -557,7 +560,14 @@ void startCannonThrow(void){
         }
         if (!gameFinished){
             BeginDrawing();
-            ClearBackground(BLACK);
+            DrawTexturePro(
+                backgroundTexture,
+                (Rectangle){0, 0, backgroundTexture.width, backgroundTexture.height},
+                (Rectangle){0, 0, SCREEN_WIDTH, SCREEN_HEIGHT},
+                (Vector2){0, 0},
+                0.0f,
+                WHITE
+            );
             DrawText(TextFormat("Obstacle Set: %d", obstacleSet), SCREEN_WIDTH - 180, 20, 20, WHITE);     
             DrawText(TextFormat("Score: %d", score), 20, 20, 20, WHITE);
             DrawText(TextFormat("Time: %d", (int)timer), 20, 45, 20, WHITE);   
@@ -565,15 +575,22 @@ void startCannonThrow(void){
                 DrawText("New High Score!", 20, 70, 20, GREEN);
             else
                 DrawText(TextFormat("High Score: %d", highScore), 20, 70, 20, WHITE);
-            DrawRectangleRec(ground, GRAY);
+            DrawTexturePro(
+                groundTexture,
+                (Rectangle){0, 0, groundTexture.width, groundTexture.height},
+                ground,
+                (Vector2){0, 0},
+                0.0f,
+                WHITE
+            );
             DrawCircleV(Orb.position, projectileOrb_size, RED);
             DrawRectangleRec(cannonBase, BROWN);
             for (int i = 0; i <= obstacleCount-1; i++){
                 if (obstacles[i].active){
-                    DrawRectangleRec(obstacles[i].rectangle, BLUE);
+                    DrawRectangleRec(obstacles[i].rectangle, DARKGRAY);
                 }
             }
-            if(!Orb.inAir)DrawRectangleRec(speedBar, GREEN);
+            if(!Orb.inAir)DrawRectangleRec(speedBar, DARKGREEN);
             DrawRectanglePro(cannonBody, cannonRotationPoint, rotation, LIGHTGRAY);
             EndDrawing();
         }
@@ -604,4 +621,6 @@ void startCannonThrow(void){
 	}
     UnloadSound(releaseSound);
     UnloadSound(hitSound);
+    UnloadTexture(groundTexture);
+    UnloadTexture(backgroundTexture);
 }

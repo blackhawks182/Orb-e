@@ -109,7 +109,8 @@ void startUnderwaterEscape(void) {
         
         SpawnHazard(hazards, spawnPos);
     }
-
+    
+    Texture2D backgroundTexture = LoadTexture("assets/underwater_background.png");
 
     // 2. Main Game Loop
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)) {
@@ -290,8 +291,14 @@ void startUnderwaterEscape(void) {
         // RENDER
         
        BeginDrawing();
-       ClearBackground(BLUE);
-
+       DrawTexturePro(
+            backgroundTexture,
+            (Rectangle){0, 0, backgroundTexture.width, backgroundTexture.height},
+            (Rectangle){0, 0, SCREEN_WIDTH, SCREEN_HEIGHT},
+            (Vector2){0, 0},
+            0.0f,
+            WHITE
+        );
         if (!gameOver) {
             // Draw Active Shurikens
             for (int i = 0; i < MAX_SHURIKENS; i++) {
@@ -351,4 +358,5 @@ void startUnderwaterEscape(void) {
 
         EndDrawing();
     }
+    UnloadTexture(backgroundTexture);
 }
