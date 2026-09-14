@@ -22,6 +22,8 @@ void startCollider(void)
     float highScore = 0;
     int newHighScore = 0;
     Texture2D groundTexture = LoadTexture("assets/cannon_throw_ground.png");
+    Sound hurtSound = LoadSound("assets/hurt.mp3");
+    Sound hitSound = LoadSound("assets/hit.mp3");
     if (FileExists("collider_highscore.txt")){
     char *highScoreText = LoadFileText("collider_highscore.txt");
     highScore = TextToFloat(highScoreText);
@@ -68,14 +70,16 @@ void startCollider(void)
             }
             if (Enemy.active && CheckCollisionCircles(Orb.position, colliderOrb_size, Enemy.position, enemy_size)){
                 if (Orb.mass * Orb.velocity.x > Enemy.mass * -Enemy.velocity.x){
+                    PlaySound(hitSound);
                     Enemy.active = 0;
                     Orb.mass += Enemy.mass*0.3f;
                     Enemy.position = (Vector2){1100, SCREEN_HEIGHT*2/3 - enemy_size};
                     Enemy.velocity = (Vector2){-GetRandomValue(100, 500), 0};
-                    Enemy.mass = GetRandomValue(5, 50) / 10.0f;
+                    Enemy.mass = GetRandomValue(5, 5*(int)(Orb.mass*10)) / 10.0f;
                     Enemy.active = 1;
                 }
                 else {
+                    PlaySound(hurtSound);
                     gameOver = 1;
                     if (Orb.mass*10 > highScore){
                         highScore = Orb.mass*10;
@@ -137,6 +141,8 @@ void startCollider(void)
             DrawText("Press ENTER to exit", 470, 565, 25, WHITE);
             EndDrawing();
             if (IsKeyPressed(KEY_R)){
+                UnloadTexture(groundTexture);
+                UnloadSound(hurtSound);
                 startCollider();
                 return;
             }
