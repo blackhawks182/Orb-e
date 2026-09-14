@@ -1,57 +1,11 @@
-#include "raylib.h"
-
-#include "raymath.h"
-
-#include "resource_dir.h"    // utility header for SearchAndSetResourceDir
-
-#define SCREEN_WIDTH 1200
-
-#define SCREEN_HEIGHT 800
-
-#define colliderOrb_size 25.0f
-
-#define enemy_size 25.0f
-
-#define start
-
-#define maxSpeed 1000.0f
-
-#define minSpeed 100.0f
-
-#define speedSpeed 500.0f
-
-#define jumpSpeed 500.0f
-
-#define gravity 1000.0f
-
-#define startSpeed 100.0f
-
-#define startMass 1.0f
-
-#define start_X 200.0f
-
-#define start_Y SCREEN_HEIGHT*2/3 - colliderOrb_size
+#include "collider.h"
 
 void startCollider(void)
 {
-    typedef struct colliderOrb{
-        Vector2 position;
-        Vector2 velocity;
-        float mass;
-        int inAir;
-    } colliderOrb;
-
-    typedef struct enemyOrb{
-        Vector2 position;
-        Vector2 velocity;
-        float mass;
-        int active;
-    } enemyOrb;
-
     Rectangle ground = {0, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
     colliderOrb Orb;
     enemyOrb Enemy;
-    Enemy.position = (Vector2){1100, GetRandomValue(150, SCREEN_HEIGHT*2/3 - enemy_size)};
+    Enemy.position = (Vector2){1100, SCREEN_HEIGHT*2/3 - enemy_size};
     Enemy.velocity = (Vector2){-GetRandomValue(100, 500), 0};
     Enemy.mass = GetRandomValue(5, 50) / 10.0f;
     Enemy.active = 1;
@@ -65,6 +19,7 @@ void startCollider(void)
     Color rec2 = GREEN;
     Color tempColor;
     int gameOver = 0;
+    Texture2D groundTexture = LoadTexture("assets/cannon_throw_ground.png");
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)&& !gameOver)
     {
         float deltaTime = GetFrameTime();
@@ -106,8 +61,8 @@ void startCollider(void)
         if (Enemy.active && CheckCollisionCircles(Orb.position, colliderOrb_size, Enemy.position, enemy_size)){
             if (Orb.mass * Orb.velocity.x > Enemy.mass * -Enemy.velocity.x){
                 Enemy.active = 0;
-                Orb.mass += Enemy.mass;
-                Enemy.position = (Vector2){1100, GetRandomValue(150, SCREEN_HEIGHT*2/3 - enemy_size)};
+                Orb.mass += Enemy.mass*0.1f;
+                Enemy.position = (Vector2){1100, SCREEN_HEIGHT*2/3 - enemy_size};
                 Enemy.velocity = (Vector2){-GetRandomValue(100, 500), 0};
                 Enemy.mass = GetRandomValue(5, 50) / 10.0f;
                 Enemy.active = 1;
@@ -122,8 +77,24 @@ void startCollider(void)
         }
         BeginDrawing();
         ClearBackground(BLACK);
-        DrawRectangle(groundPosition, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3, rec1);
-        DrawRectangle(groundPosition + SCREEN_WIDTH, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3, rec2);
+        Rectangle rect1 = {groundPosition, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
+        Rectangle rect2 = {groundPosition + SCREEN_WIDTH, SCREEN_HEIGHT*2/3, SCREEN_WIDTH, SCREEN_HEIGHT/3};
+        DrawTexturePro(
+            groundTexture,
+            (Rectangle){0, 0, groundTexture.width, groundTexture.height},
+            rect1,
+            (Vector2){0, 0},
+            0.0f,
+            WHITE
+        );
+        DrawTexturePro(
+            groundTexture,
+            (Rectangle){0, 0, groundTexture.width, groundTexture.height},
+            rect2,
+            (Vector2){0, 0},
+            0.0f,
+            WHITE
+        );
         DrawCircleV(Orb.position, colliderOrb_size, RED);
         if (Enemy.active)
             DrawCircleV(Enemy.position, enemy_size, PURPLE);
