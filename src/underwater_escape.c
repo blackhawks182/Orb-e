@@ -111,6 +111,8 @@ void startUnderwaterEscape(void) {
     }
     
     Texture2D backgroundTexture = LoadTexture("assets/title_background.png");
+    Sound hitSound = LoadSound("assets/fish_hit.mp3");
+    Sound hurtSound = LoadSound("assets/hurt.mp3");
 
     // 2. Main Game Loop
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)) {
@@ -212,6 +214,7 @@ void startUnderwaterEscape(void) {
                     if (!hazards[j].active) continue;
 
                     if (CheckCollisionCircles(shurikens[i].position, 12.5f, hazards[j].position, hazards[j].radius)) {
+                        PlaySound(hitSound);
                         shurikens[i].active = false;
                         score += 100;
                         if (score > highScore) {
@@ -229,6 +232,7 @@ void startUnderwaterEscape(void) {
                 for (int i = 0; i < MAX_HAZARDS; i++) {
                     if (hazards[i].active) {
                         if (CheckCollisionCircles(player.position, player.radius, hazards[i].position, hazards[i].radius)) {
+                            PlaySound(hurtSound);
                             lives--;
                             if (lives <= 0) {
                                 gameOver = true;
@@ -358,5 +362,7 @@ void startUnderwaterEscape(void) {
 
         EndDrawing();
     }
+    UnloadSound(hitSound);
+    UnloadSound(hurtSound);
     UnloadTexture(backgroundTexture);
 }
