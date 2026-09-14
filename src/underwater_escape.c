@@ -110,7 +110,7 @@ void startUnderwaterEscape(void) {
         SpawnHazard(hazards, spawnPos);
     }
     
-    Texture2D backgroundTexture = LoadTexture("assets/underwater_background.png");
+    Texture2D backgroundTexture = LoadTexture("assets/title_background.png");
 
     // 2. Main Game Loop
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)) {
