@@ -1,42 +1,4 @@
-#include "raylib.h"
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
-
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 800
-#define ORB_SIZE 20.0f
-#define MOVE_SPEED 350.0f // Speed of direct movement in pixels per second
-
-#define MAX_SHURIKENS 20
-#define SHURIKEN_SPEED 700.0f
-#define SHURIKEN_LIFETIME 1.5f // Seconds before a shuriken disappears
-#define MAX_HAZARDS 100
-#define MAX_LIVES 3
-#define INVULNERABILITY_TIME 2.0f // Invulnerability duration after getting hit
-#define HIGHSCORE_FILE "highscore.txt"
-
-typedef struct Orb {
-    Vector2 position;
-    float radius;
-    float rotation; // Maintained purely to point the visual indicator where you move
-} Orb;
-
-typedef struct Shuriken {
-    Vector2 position;
-    Vector2 velocity;
-    float lifeTime;
-    float rotation; // Rotation of the shuriken graphic itself
-    bool active;
-} Shuriken;
-
-typedef struct Hazard {
-    Vector2 position;
-    Vector2 velocity;
-    float radius;
-    bool active;
-} Hazard;
+#include "underwater_escape.h"
 
 // Helper to wrap positions around screen edges
 void WrapPosition(Vector2 *pos, float margin) {
@@ -110,7 +72,9 @@ void startUnderwaterEscape(void) {
         SpawnHazard(hazards, spawnPos);
     }
     
-    Texture2D backgroundTexture = LoadTexture("assets/underwater_background.png");
+    Texture2D backgroundTexture = LoadTexture("assets/title_background.png");
+    Sound hitSound = LoadSound("assets/fish_hit.mp3");
+    Sound hurtSound = LoadSound("assets/hurt.mp3");
 
     // 2. Main Game Loop
     while (!WindowShouldClose() && !IsKeyPressed(KEY_ZERO)) {
@@ -212,6 +176,7 @@ void startUnderwaterEscape(void) {
                     if (!hazards[j].active) continue;
 
                     if (CheckCollisionCircles(shurikens[i].position, 12.5f, hazards[j].position, hazards[j].radius)) {
+                        PlaySound(hitSound);
                         shurikens[i].active = false;
                         score += 100;
                         if (score > highScore) {
@@ -229,6 +194,7 @@ void startUnderwaterEscape(void) {
                 for (int i = 0; i < MAX_HAZARDS; i++) {
                     if (hazards[i].active) {
                         if (CheckCollisionCircles(player.position, player.radius, hazards[i].position, hazards[i].radius)) {
+                            PlaySound(hurtSound);
                             lives--;
                             if (lives <= 0) {
                                 gameOver = true;
@@ -358,5 +324,7 @@ void startUnderwaterEscape(void) {
 
         EndDrawing();
     }
+    UnloadSound(hitSound);
+    UnloadSound(hurtSound);
     UnloadTexture(backgroundTexture);
 }
